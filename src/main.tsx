@@ -56,17 +56,25 @@ function patchHeroContent() {
   const heroTitle = heroSection.querySelector('h1') as HTMLElement | null
   if (!heroTitle) return false
 
-  // Remove any old injected floating badge in hero.
+  // Remove old injected hero elements from previous patches.
   const oldHeroBadge = document.getElementById('hero-logo-badge')
   if (oldHeroBadge) oldHeroBadge.remove()
+  heroSection.querySelectorAll('#hero-logo-badge, [data-injected-hero-logo], [data-injected-hero-text]').forEach((el) => el.remove())
 
-  // Push hero content down so it does not overlap with the fixed top menu area.
+  // Push hero content down to avoid overlap with fixed menu.
   const textContainer = heroTitle.parentElement as HTMLElement | null
   if (textContainer) {
-    textContainer.style.marginTop = '56px'
+    textContainer.style.marginTop = '84px'
   }
 
+  // Restore headline style close to original look.
   heroTitle.innerHTML = ''
+  heroTitle.style.fontSize = 'clamp(44px, 7vw, 96px)'
+  heroTitle.style.lineHeight = '1.04'
+  heroTitle.style.fontWeight = '800'
+  heroTitle.style.color = '#f5c542'
+  heroTitle.style.textShadow = '0 0 10px rgba(255,255,255,0.45), 0 2px 10px rgba(0,0,0,0.35)'
+
   const mainLine = document.createElement('span')
   mainLine.textContent = 'Vọng Âm Quá Khứ'
   mainLine.style.display = 'block'
@@ -74,15 +82,22 @@ function patchHeroContent() {
   const subLine = document.createElement('span')
   subLine.textContent = 'Hành Trình Di Sản Của 3 Công Chúa'
   subLine.style.display = 'block'
-  subLine.style.fontSize = '0.65em'
-  subLine.style.marginTop = '8px'
+  subLine.style.fontSize = '0.72em'
+  subLine.style.marginTop = '10px'
+  subLine.style.color = '#ffffff'
+  subLine.style.textShadow = '0 0 8px rgba(245,197,66,0.55), 0 2px 8px rgba(0,0,0,0.35)'
 
   heroTitle.appendChild(mainLine)
   heroTitle.appendChild(subLine)
 
+  // Hero tagline under title.
   const introP = heroTitle.parentElement?.querySelector('p') as HTMLElement | null
   if (introP) {
     introP.textContent = 'Nơi Dấu Ấn 3 Miền Thăng Hoa, Tri Thức 3 Miền Thăng Hoa'
+    introP.style.color = 'rgba(255,255,255,0.96)'
+    introP.style.textShadow = '0 1px 6px rgba(0,0,0,0.45)'
+    introP.style.fontSize = 'clamp(18px, 2.3vw, 34px)'
+    introP.style.fontWeight = '500'
   }
 
   return true
