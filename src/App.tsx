@@ -163,11 +163,17 @@ function Header() {
 function HeroSection() {
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-amber-50 via-orange-50 to-white py-16 md:py-24">
+      <div className="absolute left-4 top-4 z-10 flex items-center gap-2 rounded-full bg-white/85 px-2.5 py-1.5 shadow md:left-6 md:top-6">
+        <img
+          src="/logo-3-cong-chua.jpg"
+          alt="Logo 3 công chúa"
+          className="h-8 w-8 rounded-full object-cover md:h-10 md:w-10"
+        />
+        <span className="text-xs font-semibold uppercase tracking-wide text-amber-800">3 công chúa</span>
+      </div>
+
       <div className="mx-auto grid max-w-7xl gap-10 px-4 md:grid-cols-2 md:items-center md:px-6">
         <div>
-          <p className="mb-3 inline-block rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-amber-700">
-            Dự án văn hóa số
-          </p>
           <h1 className="text-3xl font-extrabold leading-tight text-amber-950 md:text-5xl">
             Vọng Âm Quá Khứ
             <br />
