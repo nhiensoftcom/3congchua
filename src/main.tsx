@@ -66,6 +66,46 @@ function patchHeroContent() {
     if (src.includes('logo-3-cong-chua.jpg')) img.remove()
   })
 
+  // Inject looping hero video background with overlays.
+  if (!heroSection.querySelector('#hero-bg-video')) {
+    const video = document.createElement('video')
+    video.id = 'hero-bg-video'
+    video.src = '/hero-video.mp4'
+    video.autoplay = true
+    video.loop = true
+    video.muted = true
+    video.playsInline = true
+    video.setAttribute('preload', 'auto')
+    video.style.position = 'absolute'
+    video.style.inset = '0'
+    video.style.width = '100%'
+    video.style.height = '100%'
+    video.style.objectFit = 'cover'
+    video.style.zIndex = '0'
+
+    const darkOverlay = document.createElement('div')
+    darkOverlay.id = 'hero-bg-overlay-dark'
+    darkOverlay.style.position = 'absolute'
+    darkOverlay.style.inset = '0'
+    darkOverlay.style.background = 'rgba(5, 10, 20, 0.48)'
+    darkOverlay.style.zIndex = '1'
+
+    const gradientOverlay = document.createElement('div')
+    gradientOverlay.id = 'hero-bg-overlay-gradient'
+    gradientOverlay.style.position = 'absolute'
+    gradientOverlay.style.inset = '0'
+    gradientOverlay.style.background = 'linear-gradient(180deg, rgba(245,158,11,0.18) 0%, rgba(0,0,0,0.30) 100%)'
+    gradientOverlay.style.zIndex = '2'
+
+    heroSection.prepend(gradientOverlay)
+    heroSection.prepend(darkOverlay)
+    heroSection.prepend(video)
+  }
+
+  // Keep hero text above video + overlays.
+  ;(heroTitle.parentElement as HTMLElement).style.position = 'relative'
+  ;(heroTitle.parentElement as HTMLElement).style.zIndex = '4'
+
   // Push hero content down to avoid overlap with fixed menu.
   const textContainer = heroTitle.parentElement as HTMLElement | null
   if (textContainer) {
