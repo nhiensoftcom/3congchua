@@ -1,157 +1,239 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 
-type Product = {
-  id: string
-  name: string
-  image: string
-  desc: string
-  province: 'thanh-hoa' | 'quang-ninh' | 'hung-yen'
-}
+/* ====================================================================
+   TYPES
+   ==================================================================== */
+type Province = 'thanh-hoa' | 'quang-ninh' | 'hung-yen'
 
-type GameItem = {
-  id: string
-  name: string
-  province: 'hung-yen' | 'thai-binh'
-}
-
+/* ====================================================================
+   CONSTANTS
+   ==================================================================== */
 const NAV_ITEMS = [
   { label: 'Giới thiệu', href: '#gioi-thieu' },
-  { label: 'Bản đồ', href: '#ban-do' },
   { label: 'Thanh Hóa', href: '#thanh-hoa' },
   { label: 'Quảng Ninh', href: '#quang-ninh' },
   { label: 'Hưng Yên', href: '#hung-yen' },
-  { label: 'Giao Lộ Định Mệnh', href: '#giao-lo-dinh-menh' },
+  { label: 'Giao Lộ', href: '#giao-lo-dinh-menh' },
   { label: 'Đại Học Mở', href: '#dai-hoc-mo' },
   { label: 'Liên Hệ', href: '#lien-he' },
 ]
 
+const SIDE_NAV_ITEMS = [
+  { id: 'thanh-hoa', label: 'Thanh Hóa', icon: '🪘' },
+  { id: 'quang-ninh', label: 'Quảng Ninh', icon: '🌊' },
+  { id: 'hung-yen', label: 'Hưng Yên', icon: '🍈' },
+  { id: 'dai-hoc-mo', label: 'Đại Học Mở', icon: '🎓' },
+]
+
 const PRINCESSES = [
   {
-    id: 'thanh-hoa',
+    id: 'thanh-hoa' as Province,
     name: 'Công chúa Đất Việt',
     province: 'Thanh Hóa',
-    quote:
-      '“Thanh Hóa là mảnh đất địa linh nhân kiệt, nơi các triều đại phong kiến hưng thịnh với vô vàn di tích lịch sử và danh lam thắng cảnh tuyệt đẹp.”',
-    image:
-      'https://images.unsplash.com/photo-1528127269322-539801943592?q=80&w=800&auto=format&fit=crop',
+    quote: '"Em là công chúa đất Việt - Thanh Hoá! Nơi khởi nguồn của những triều đại huy hoàng."',
+    image: 'https://images.unsplash.com/photo-1528127269322-539801943592?q=80&w=800&auto=format&fit=crop',
   },
   {
-    id: 'quang-ninh',
+    id: 'quang-ninh' as Province,
     name: 'Công chúa Biển Xanh',
     province: 'Quảng Ninh',
-    quote:
-      '“Quảng Ninh với Vịnh Hạ Long kỳ vĩ và những truyền thuyết hấp dẫn luôn khiến lòng người mê đắm.”',
-    image:
-      'https://images.unsplash.com/photo-1473116763249-2faaef81ccda?q=80&w=800&auto=format&fit=crop',
+    quote: '"Quảng Ninh với Vịnh Hạ Long kỳ vĩ và những truyền thuyết hấp dẫn luôn khiến lòng người mê đắm."',
+    image: 'https://images.unsplash.com/photo-1473116763249-2faaef81ccda?q=80&w=800&auto=format&fit=crop',
   },
   {
-    id: 'hung-yen',
+    id: 'hung-yen' as Province,
     name: 'Công chúa Đất Lúa',
     province: 'Hưng Yên',
-    quote:
-      '“Hưng Yên, Phố Hiến xưa, nơi lưu giữ những nét đẹp văn hóa độc đáo và những đặc sản trứ danh.”',
-    image:
-      'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?q=80&w=800&auto=format&fit=crop',
+    quote: '"Hưng Yên, Phố Hiến xưa, nơi lưu giữ những nét đẹp văn hóa độc đáo và những đặc sản trứ danh."',
+    image: 'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?q=80&w=800&auto=format&fit=crop',
   },
 ]
 
-const FESTIVAL_CARDS = [
-  {
-    name: 'Lễ hội Yên Tử',
-    icon: '🏔️',
-    desc: 'Diễn ra từ mùng 10 tháng Giêng âm lịch, là hành trình về miền thiêng của Phật giáo Trúc Lâm.',
-  },
-  {
-    name: 'Carnaval Hạ Long',
-    icon: '🎪',
-    desc: 'Thường tổ chức cuối tháng 4 – đầu tháng 5, thời điểm đẹp để du lịch Hạ Long và hòa vào không khí lễ hội biển.',
-  },
-  {
-    name: 'Lễ hội Bạch Đằng',
-    icon: '⚔️',
-    desc: 'Diễn ra vào tháng 3 âm lịch, tưởng niệm chiến thắng Bạch Đằng và giáo dục truyền thống yêu nước.',
-  },
+const QUIZ_QUESTIONS = [
+  { q: 'Thành Nhà Hồ được xây dựng vào năm nào?', options: ['1397', '1400', '1428'], answer: '1397' },
+  { q: 'Triều đại nào gắn liền với Lam Kinh?', options: ['Nhà Trần', 'Hậu Lê', 'Nhà Lý'], answer: 'Hậu Lê' },
+  { q: 'Trống đồng Đông Sơn thuộc nền văn minh nào?', options: ['Văn minh Đông Sơn', 'Văn minh Óc Eo', 'Văn minh Chăm Pa'], answer: 'Văn minh Đông Sơn' },
 ]
 
-const SAN_PHAM: Product[] = [
-  {
-    id: 'sp-th-1',
-    name: 'Nem chua Thanh Hóa',
-    image:
-      'https://images.unsplash.com/photo-1600891963935-c1a1f4dcf04b?q=80&w=800&auto=format&fit=crop',
-    desc: 'Món quà nổi tiếng của xứ Thanh với vị chua thanh, dai giòn và thơm mùi lá đinh lăng.',
-    province: 'thanh-hoa',
-  },
-  {
-    id: 'sp-qn-1',
-    name: 'Chả mực Hạ Long',
-    image:
-      'https://images.unsplash.com/photo-1547592180-85f173990554?q=80&w=800&auto=format&fit=crop',
-    desc: 'Đặc sản trứ danh của Quảng Ninh, thơm ngọt vị mực tươi, giã tay đậm chất biển.',
-    province: 'quang-ninh',
-  },
-  {
-    id: 'sp-hy-1',
-    name: 'Nhãn lồng Hưng Yên',
-    image:
-      'https://images.unsplash.com/photo-1490474418585-ba9bad8fd0ea?q=80&w=800&auto=format&fit=crop',
-    desc: 'Trái nhãn thơm ngọt nức tiếng, gắn với vùng đất văn hiến Phố Hiến.',
-    province: 'hung-yen',
-  },
-]
+/* ====================================================================
+   HOOKS
+   ==================================================================== */
+function useScrollReveal() {
+  const ref = useRef<HTMLDivElement>(null)
+  const [visible, setVisible] = useState(false)
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setVisible(true); obs.disconnect() } }, { threshold: 0.1 })
+    obs.observe(el)
+    return () => obs.disconnect()
+  }, [])
+  return { ref, visible }
+}
 
-const GAME_ITEMS: GameItem[] = [
-  { id: 'gy-1', name: 'Nhãn lồng', province: 'hung-yen' },
-  { id: 'gy-2', name: 'Tương Bần', province: 'hung-yen' },
-  { id: 'gy-3', name: 'Long nhãn', province: 'hung-yen' },
-  { id: 'gy-4', name: 'Bánh cáy', province: 'thai-binh' },
-  { id: 'gy-5', name: 'Canh cá Quỳnh Côi', province: 'thai-binh' },
-  { id: 'gy-6', name: 'Bánh gai Đại Đồng', province: 'thai-binh' },
-]
+function useActiveSection(ids: string[]) {
+  const [active, setActive] = useState('')
+  useEffect(() => {
+    const observers: IntersectionObserver[] = []
+    ids.forEach(id => {
+      const el = document.getElementById(id)
+      if (!el) return
+      const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) setActive(id) }, { threshold: 0.2, rootMargin: '-100px 0px -40% 0px' })
+      obs.observe(el)
+      observers.push(obs)
+    })
+    return () => observers.forEach(o => o.disconnect())
+  }, [ids])
+  return active
+}
 
-function Header() {
-  const [open, setOpen] = useState(false)
+function useSideNavVisible() {
+  const [show, setShow] = useState(false)
+  useEffect(() => {
+    const check = () => {
+      const th = document.getElementById('thanh-hoa')
+      const dm = document.getElementById('dai-hoc-mo')
+      if (!th || !dm) return
+      const top = th.getBoundingClientRect().top
+      const bot = dm.getBoundingClientRect().bottom
+      setShow(top < window.innerHeight * 0.5 && bot > 100)
+    }
+    window.addEventListener('scroll', check, { passive: true })
+    check()
+    return () => window.removeEventListener('scroll', check)
+  }, [])
+  return show
+}
+
+/* ====================================================================
+   SHARED COMPONENTS
+   ==================================================================== */
+function Reveal({ children, className = '', delay = 0 }: { children: ReactNode; className?: string; delay?: number }) {
+  const { ref, visible } = useScrollReveal()
+  return (
+    <div ref={ref} className={`transition-all duration-700 ease-out ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'} ${className}`} style={{ transitionDelay: `${delay}ms` }}>
+      {children}
+    </div>
+  )
+}
+
+function ProgressBar({ steps, current, onNav, color }: { steps: string[]; current: number; onNav: (i: number) => void; color: string }) {
+  const pct = ((current + 1) / steps.length) * 100
+  return (
+    <div className="mt-6">
+      <div className="progress-bar-track mb-3">
+        <div className="progress-bar-fill" style={{ width: `${pct}%`, background: color }} />
+      </div>
+      <div className="flex items-center justify-between text-xs">
+        {steps.map((s, i) => (
+          <button key={s} onClick={() => onNav(i)} className={`transition font-medium ${i <= current ? 'opacity-100' : 'opacity-50'}`} style={{ color: i <= current ? color : 'rgba(255,255,255,0.5)' }}>
+            {s}
+          </button>
+        ))}
+        <span className="text-lg">🎁</span>
+      </div>
+    </div>
+  )
+}
+
+function OrderModal({ open, onClose, productName, accentColor }: { open: boolean; onClose: () => void; productName: string; accentColor: string }) {
+  const [submitted, setSubmitted] = useState(false)
+  const [form, setForm] = useState({ name: '', phone: '', address: '' })
+
+  if (!open) return null
+
+  const handleSubmit = () => { setSubmitted(true) }
+  const handleClose = () => { setSubmitted(false); setForm({ name: '', phone: '', address: '' }); onClose() }
 
   return (
-    <header className="sticky top-0 z-50 border-b border-amber-200/70 bg-white/90 backdrop-blur">
+    <div className="modal-overlay" onClick={handleClose}>
+      <div className="glass-dark rounded-2xl p-6 w-full max-w-md mx-4 text-white" onClick={e => e.stopPropagation()}>
+        {submitted ? (
+          <div className="text-center py-8">
+            <div className="text-5xl mb-4">🎉</div>
+            <h3 className="text-xl font-bold mb-2">Cảm ơn bạn!</h3>
+            <p className="text-sm text-white/80">Cảm ơn bạn đã đồng hành cùng 3 Công Chúa giữ gìn tinh hoa Việt. Đơn hàng đang được chuẩn bị!</p>
+            <button onClick={handleClose} className="mt-6 rounded-lg px-6 py-2 text-sm font-semibold text-white" style={{ background: accentColor }}>Đóng</button>
+          </div>
+        ) : (
+          <>
+            <h3 className="text-lg font-bold mb-1">Đặt hàng: {productName}</h3>
+            <p className="text-xs text-white/60 mb-4">Vui lòng điền thông tin để chúng tôi liên hệ giao hàng</p>
+            <div className="space-y-3">
+              <input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} className="w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2.5 text-sm text-white placeholder:text-white/40 outline-none focus:border-white/40" placeholder="Họ và tên" />
+              <input value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} className="w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2.5 text-sm text-white placeholder:text-white/40 outline-none focus:border-white/40" placeholder="Số điện thoại" />
+              <input value={form.address} onChange={e => setForm(f => ({ ...f, address: e.target.value }))} className="w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2.5 text-sm text-white placeholder:text-white/40 outline-none focus:border-white/40" placeholder="Địa chỉ giao hàng" />
+            </div>
+            <button onClick={handleSubmit} disabled={!form.name || !form.phone || !form.address} className="btn-shine mt-4 w-full rounded-lg py-3 text-sm font-bold text-white disabled:opacity-40" style={{ background: `linear-gradient(135deg, ${accentColor}, ${accentColor}cc)` }}>
+              ĐẶT HÀNG NGAY
+            </button>
+            <button onClick={handleClose} className="mt-2 w-full text-center text-xs text-white/50 hover:text-white/80">Huỷ</button>
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
+
+/* ====================================================================
+   SIDE NAV (Vertical left)
+   ==================================================================== */
+function SideNav() {
+  const show = useSideNavVisible()
+  const active = useActiveSection(['thanh-hoa', 'quang-ninh', 'hung-yen', 'dai-hoc-mo'])
+
+  return (
+    <nav className={`side-nav glass-dark ${show ? '' : 'hidden'}`}>
+      {SIDE_NAV_ITEMS.map(item => {
+        const isActive = active === item.id
+        return (
+          <a key={item.id} href={`#${item.id}`} className={`flex flex-col items-center gap-1 rounded-lg px-2 py-2 text-center transition ${isActive ? 'bg-amber-500/20 text-amber-300' : 'text-white/60 hover:text-white/90'}`}>
+            <span className="text-lg">{item.icon}</span>
+            <span className="text-[9px] font-semibold leading-tight">{item.label}</span>
+          </a>
+        )
+      })}
+    </nav>
+  )
+}
+
+/* ====================================================================
+   HEADER
+   ==================================================================== */
+function Header() {
+  const [open, setOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
+
+  useEffect(() => {
+    const h = () => setScrolled(window.scrollY > 50)
+    window.addEventListener('scroll', h, { passive: true })
+    return () => window.removeEventListener('scroll', h)
+  }, [])
+
+  return (
+    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-slate-900/95 backdrop-blur shadow-lg' : 'bg-transparent'}`}>
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 md:px-6">
-        <a href="#" className="text-lg font-bold text-amber-900 md:text-xl">
-          🏛️ Vọng Âm Quá Khứ
+        <a href="#" className="flex items-center gap-2">
+          <img src="/logo-3-cong-chua.jpg" alt="Logo" className="h-9 w-9 rounded-full object-cover border-2 border-amber-400/70" />
+          <span className="text-sm font-bold text-amber-300">3 Công Chúa</span>
         </a>
 
-        <nav className="hidden items-center gap-5 md:flex">
-          {NAV_ITEMS.map((item) => (
-            <a
-              key={item.href}
-              href={item.href}
-              className="text-sm font-medium text-amber-800 transition hover:text-amber-600"
-            >
-              {item.label}
-            </a>
+        <nav className="hidden items-center gap-5 lg:flex">
+          {NAV_ITEMS.map(item => (
+            <a key={item.href} href={item.href} className="text-sm font-medium text-white/80 transition hover:text-amber-300">{item.label}</a>
           ))}
         </nav>
 
-        <button
-          onClick={() => setOpen((v) => !v)}
-          className="rounded-md border border-amber-300 px-3 py-1.5 text-sm text-amber-800 md:hidden"
-          aria-label="Mở menu"
-        >
-          Menu
+        <button onClick={() => setOpen(v => !v)} className="rounded-md border border-amber-400/50 px-3 py-1.5 text-sm text-amber-300 lg:hidden" aria-label="Menu">
+          {open ? '✕' : '☰'}
         </button>
       </div>
 
       {open && (
-        <div className="border-t border-amber-200 bg-white px-4 py-3 md:hidden">
+        <div className="border-t border-white/10 bg-slate-900/95 px-4 py-3 lg:hidden backdrop-blur">
           <div className="grid gap-2">
-            {NAV_ITEMS.map((item) => (
-              <a
-                key={item.href}
-                href={item.href}
-                onClick={() => setOpen(false)}
-                className="rounded-md px-2 py-1.5 text-sm text-amber-900 hover:bg-amber-50"
-              >
-                {item.label}
-              </a>
+            {NAV_ITEMS.map(item => (
+              <a key={item.href} href={item.href} onClick={() => setOpen(false)} className="rounded-md px-2 py-1.5 text-sm text-white/80 hover:bg-white/10 hover:text-amber-300">{item.label}</a>
             ))}
           </div>
         </div>
@@ -160,109 +242,82 @@ function Header() {
   )
 }
 
+/* ====================================================================
+   HERO SECTION
+   ==================================================================== */
 function HeroSection() {
   return (
-    <section className="relative overflow-hidden bg-gradient-to-b from-amber-50 via-orange-50 to-white py-16 md:py-24">
-      <div className="absolute left-4 top-4 z-10 flex items-center gap-2 rounded-full bg-white/85 px-2.5 py-1.5 shadow md:left-6 md:top-6">
-        <img
-          src="/logo-3-cong-chua.jpg"
-          alt="Logo 3 công chúa"
-          className="h-8 w-8 rounded-full object-cover md:h-10 md:w-10"
-        />
-        <span className="text-xs font-semibold uppercase tracking-wide text-amber-800">3 công chúa</span>
-      </div>
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+      {/* Video background */}
+      <video autoPlay loop muted playsInline preload="auto" className="absolute inset-0 w-full h-full object-cover z-0">
+        <source src="/hero-video.mp4" type="video/mp4" />
+      </video>
+      <div className="absolute inset-0 bg-black/50 z-[1]" />
+      <div className="absolute inset-0 bg-gradient-to-b from-amber-900/20 via-transparent to-black/40 z-[2]" />
 
-      <div className="mx-auto grid max-w-7xl gap-10 px-4 md:grid-cols-2 md:items-center md:px-6">
-        <div>
-          <h1 className="text-3xl font-extrabold leading-tight text-amber-950 md:text-5xl">
+      {/* Content */}
+      <div className="relative z-[3] text-center px-4 max-w-4xl mx-auto mt-16">
+        <Reveal>
+          <h1 className="gradient-title text-5xl md:text-7xl lg:text-8xl font-extrabold leading-tight" style={{ lineHeight: '1.05' }}>
             Vọng Âm Quá Khứ
-            <br />
-            Hành Trình Di Sản của 3 Công Chúa
           </h1>
-          <p className="mt-4 max-w-xl text-amber-800/90 md:text-lg">
-            Cùng ba công chúa đi qua Thanh Hóa, Quảng Ninh, Hưng Yên để khám phá di tích,
-            lễ hội, đặc sản và những câu chuyện văn hóa đậm hồn Việt.
+        </Reveal>
+        <Reveal delay={200}>
+          <p className="mt-3 text-xl md:text-3xl lg:text-4xl font-bold text-white" style={{ textShadow: '0 0 8px rgba(245,197,66,0.55), 0 2px 8px rgba(0,0,0,0.35)' }}>
+            Hành Trình Di Sản Của 3 Công Chúa
           </p>
-          <a
-            href="#gioi-thieu"
-            className="mt-6 inline-flex rounded-lg bg-amber-600 px-5 py-3 font-semibold text-white shadow transition hover:bg-amber-700"
-          >
-            Bắt đầu hành trình khám phá
+        </Reveal>
+        <Reveal delay={400}>
+          <p className="mt-5 text-lg md:text-2xl font-medium text-white/95" style={{ textShadow: '0 1px 6px rgba(0,0,0,0.45)' }}>
+            Nơi Dấu Ấn Ba Miền Thăng Hoa, Tri Thức Kiến Tạo Tương Lai
+          </p>
+        </Reveal>
+        <Reveal delay={600}>
+          <p className="mt-4 text-sm md:text-base text-white/85 max-w-2xl mx-auto" style={{ textShadow: '0 1px 4px rgba(0,0,0,0.4)' }}>
+            Cùng 3 Công Chúa dấn thân vào một hành trình khám phá những câu chuyện từ ngàn xưa, những giá trị văn hóa bất diệt và ước mơ kiến tạo tương lai
+          </p>
+        </Reveal>
+        <Reveal delay={800}>
+          <a href="#gioi-thieu" className="btn-shine mt-8 inline-flex rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 px-8 py-4 font-bold text-white shadow-lg shadow-amber-500/25 transition hover:shadow-amber-500/40 hover:scale-105">
+            Bắt Đầu Hành Trình Khám Phá Ngay
           </a>
-        </div>
-
-        <div className="relative">
-          <img
-            src="https://images.unsplash.com/photo-1539650116574-8efeb43e2750?q=80&w=1200&auto=format&fit=crop"
-            alt="Phong cảnh di sản Việt Nam"
-            className="h-72 w-full rounded-2xl object-cover shadow-xl md:h-[440px]"
-          />
-          <div className="absolute -bottom-5 -left-3 rounded-xl bg-white/90 p-3 text-sm text-amber-800 shadow-lg">
-            ✨ 3 tỉnh – 1 hành trình di sản
-          </div>
-        </div>
+        </Reveal>
       </div>
     </section>
   )
 }
 
+/* ====================================================================
+   3 CÔNG CHÚA - LỜI TỰ SỰ TỪ TRÁI TIM
+   ==================================================================== */
 function PrincessesSection() {
   return (
-    <section id="gioi-thieu" className="mx-auto max-w-7xl px-4 py-14 md:px-6 md:py-20">
-      <div className="text-center">
-        <h2 className="text-2xl font-bold text-amber-950 md:text-4xl">Ba Công Chúa – Ba Miền Di Sản</h2>
-        <p className="mx-auto mt-3 max-w-3xl text-amber-800/90">
-          Mỗi công chúa là một người kể chuyện, dẫn bạn qua từng miền đất với góc nhìn riêng, giàu cảm xúc và đậm giá trị văn hóa.
-        </p>
-      </div>
-
-      <div className="mt-8 grid gap-6 md:grid-cols-3">
-        {PRINCESSES.map((p) => (
-          <article
-            key={p.id}
-            className="overflow-hidden rounded-2xl border border-amber-100 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md"
-          >
-            <img src={p.image} alt={p.name} className="h-52 w-full object-cover" />
-            <div className="p-5">
-              <h3 className="text-lg font-bold text-amber-900">{p.name}</h3>
-              <p className="text-sm text-amber-600">{p.province}</p>
-              <p className="mt-3 text-sm leading-relaxed text-amber-800">{p.quote}</p>
-              <a
-                href={`#${p.id}`}
-                className="mt-4 inline-flex rounded-md border border-amber-300 px-3 py-1.5 text-sm font-medium text-amber-700 hover:bg-amber-50"
-              >
-                Khám phá {p.province}
-              </a>
-            </div>
-          </article>
-        ))}
-      </div>
-    </section>
-  )
-}
-
-function BanDoSection() {
-  return (
-    <section id="ban-do" className="bg-amber-50/60 py-14 md:py-18">
+    <section id="gioi-thieu" className="bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 py-16 md:py-24">
       <div className="mx-auto max-w-7xl px-4 md:px-6">
-        <div className="mb-6 text-center">
-          <h2 className="text-2xl font-bold text-amber-950 md:text-3xl">Bản Đồ Hành Trình</h2>
-          <p className="mt-2 text-amber-800/90">Thanh Hóa → Quảng Ninh → Hưng Yên → Kết nối tri thức tại Đại học Mở Hà Nội.</p>
-        </div>
+        <Reveal>
+          <div className="text-center">
+            <h2 className="text-3xl font-bold text-amber-300 md:text-4xl">3 Công Chúa: Lời Tự Sự Từ Trái Tim</h2>
+            <p className="mx-auto mt-3 max-w-3xl text-white/70">Mỗi công chúa là một người kể chuyện, dẫn bạn qua từng miền đất với góc nhìn riêng, giàu cảm xúc và đậm giá trị văn hóa.</p>
+          </div>
+        </Reveal>
 
-        <div className="grid gap-4 md:grid-cols-4">
-          {[
-            { name: 'Thanh Hóa', icon: '🏰', desc: 'Cội nguồn lịch sử – văn hóa' },
-            { name: 'Quảng Ninh', icon: '⛰️', desc: 'Kỳ quan thiên nhiên và lễ hội biển' },
-            { name: 'Hưng Yên', icon: '🏮', desc: 'Phố Hiến xưa, lễ hội và đặc sản' },
-            { name: 'Đại học Mở', icon: '🎓', desc: 'Kết nối di sản với tương lai' },
-          ].map((item, idx) => (
-            <div key={item.name} className="rounded-xl border border-amber-200 bg-white p-4 text-center shadow-sm">
-              <div className="text-2xl">{item.icon}</div>
-              <h3 className="mt-2 font-bold text-amber-900">{item.name}</h3>
-              <p className="mt-1 text-sm text-amber-700">{item.desc}</p>
-              {idx < 3 && <p className="mt-2 text-amber-500">→</p>}
-            </div>
+        <div className="mt-10 grid gap-8 md:grid-cols-3">
+          {PRINCESSES.map((p, i) => (
+            <Reveal key={p.id} delay={i * 200}>
+              <article className="group text-center">
+                <div className="mx-auto mb-4 h-36 w-36 overflow-hidden rounded-full border-4 border-amber-400/60 shadow-lg shadow-amber-500/20 transition group-hover:border-amber-300 group-hover:shadow-amber-500/40">
+                  <img src={p.image} alt={p.name} className="h-full w-full object-cover transition group-hover:scale-110" />
+                </div>
+                <h3 className="text-lg font-bold text-amber-200">{p.name}</h3>
+                <p className="text-sm text-amber-400/80">{p.province}</p>
+                <div className="mt-3 glass-dark rounded-xl p-4 text-sm text-white/80 italic leading-relaxed">
+                  {p.quote}
+                </div>
+                <a href={`#${p.id}`} className="mt-4 inline-flex rounded-lg border border-amber-400/40 px-4 py-2 text-sm font-medium text-amber-300 transition hover:bg-amber-400/10">
+                  Xem quê hương tôi
+                </a>
+              </article>
+            </Reveal>
           ))}
         </div>
       </div>
@@ -270,496 +325,579 @@ function BanDoSection() {
   )
 }
 
+/* ====================================================================
+   THANH HÓA SECTION
+   ==================================================================== */
 function ThanhHoaSection() {
   const [page, setPage] = useState(0)
-  const [timeLeft, setTimeLeft] = useState(180)
-  const [score, setScore] = useState(0)
-  const [started, setStarted] = useState(false)
-  const [done, setDone] = useState(false)
+  const [accActive, setAccActive] = useState(0)
+  const [quizIdx, setQuizIdx] = useState(0)
+  const [quizScore, setQuizScore] = useState(0)
+  const [quizAnswered, setQuizAnswered] = useState<Record<number, boolean>>({})
+  const [orderOpen, setOrderOpen] = useState(false)
 
-  useMemo(() => {
-    if (!started || done) return
-    const id = setInterval(() => {
-      setTimeLeft((s) => {
-        if (s <= 1) {
-          clearInterval(id)
-          setDone(true)
-          setStarted(false)
-          return 0
-        }
-        return s - 1
-      })
-    }, 1000)
-    return () => clearInterval(id)
-  }, [started, done])
+  const accItems = [
+    { title: 'Di tích lịch sử', image: '/images/thanh-nha-ho.png', desc: 'Thành Nhà Hồ là di sản văn hóa thế giới UNESCO, được xây dựng năm 1397. Lam Kinh là vùng đất linh thiêng gắn với triều Hậu Lê, mang đậm dấu ấn lịch sử dân tộc.' },
+    { title: 'Danh lam thắng cảnh', image: '/images/bien-sam-son.png', desc: 'Biển Sầm Sơn được bao bọc bởi núi Trường Lệ và đền Độc Cước, tạo nên cảnh quan hùng vĩ.' },
+    { title: 'Người kiên cường', image: '/images/le-hoi-poon-poong.png', desc: 'Lễ hội Pôồn Pôông - nghi lễ dân gian đặc sắc của người Mường tại Thanh Hóa, thường tổ chức vào rằm tháng Giêng hoặc tháng Bảy, cầu mùa màng bội thu và nhân khang vật thịnh.' },
+  ]
 
-  const pages = [
-    {
-      title: 'Thành Nhà Hồ & Lam Kinh',
-      text: 'Thành Nhà Hồ là di sản văn hóa thế giới; Lam Kinh là vùng đất linh thiêng gắn với triều Hậu Lê, mang đậm dấu ấn lịch sử dân tộc.',
-      image:
-        'https://images.unsplash.com/photo-1469474968028-56623f02e42e?q=80&w=1200&auto=format&fit=crop',
-    },
-    {
-      title: 'Trống đồng Đông Sơn',
-      text: 'Biểu tượng của văn minh Việt cổ, phản ánh đời sống vật chất và tinh thần rực rỡ của cư dân Lạc Việt xưa.',
-      image:
-        'https://images.unsplash.com/photo-1518509562904-e7ef99cdcc86?q=80&w=1200&auto=format&fit=crop',
-    },
-    {
-      title: 'Đất thiêng xứ Thanh',
-      text: 'Ngoài hệ thống di tích dày đặc, Thanh Hóa còn hấp dẫn bởi cảnh quan và đặc sản mang hồn đất Việt.',
-      image:
-        'https://images.unsplash.com/photo-1526779259212-756e4ffadf46?q=80&w=1200&auto=format&fit=crop',
-    },
+  const stepLabels = ['Di tích lịch sử', 'Khám phá báu vật', 'Thưởng thức vị quê']
+
+  const handleQuizAnswer = (ans: string) => {
+    if (quizAnswered[quizIdx]) return
+    const correct = ans === QUIZ_QUESTIONS[quizIdx].answer
+    setQuizAnswered(s => ({ ...s, [quizIdx]: true }))
+    if (correct) setQuizScore(s => s + 10)
+  }
+
+  return (
+    <section id="thanh-hoa" className="relative py-16 md:py-24 overflow-hidden" style={{ background: 'linear-gradient(135deg, #7f1d1d 0%, #991b1b 40%, #7f1d1d 100%)' }}>
+      <div className="mx-auto max-w-7xl px-4 md:px-6">
+        <Reveal>
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold text-amber-200 md:text-4xl">Thanh Hóa: Nơi Khởi Nguyên Của Những Triều Đại</h2>
+            <p className="mt-2 text-amber-100/70">Hào Khí Ngàn Năm</p>
+          </div>
+        </Reveal>
+
+        {/* Page 1: Horizontal Accordion + Quiz */}
+        {page === 0 && (
+          <Reveal>
+            <div className="h-accordion">
+              {accItems.map((item, i) => (
+                <div key={item.title} className={`h-accordion-item ${i === accActive ? 'active' : ''}`} onClick={() => setAccActive(i)}>
+                  <img src={item.image} alt={item.title} className="acc-bg" />
+                  <div className="collapsed-title">{item.title}</div>
+                  <div className="overlay-content">
+                    <div className="glass-dark rounded-xl p-4">
+                      <h3 className="text-lg font-bold text-amber-200">{item.title}</h3>
+                      <p className="mt-2 text-sm text-white/85 leading-relaxed">{item.desc}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Quiz */}
+            <div className="mt-8 glass-dark rounded-2xl p-6">
+              <h3 className="text-lg font-bold text-amber-200">🧠 Thử tài sử học nhí</h3>
+              <p className="mt-1 text-sm text-white/60">Câu {quizIdx + 1}/{QUIZ_QUESTIONS.length}: {QUIZ_QUESTIONS[quizIdx].q}</p>
+              <div className="mt-4 grid gap-2 sm:grid-cols-3">
+                {QUIZ_QUESTIONS[quizIdx].options.map(opt => {
+                  const answered = quizAnswered[quizIdx]
+                  const isCorrect = opt === QUIZ_QUESTIONS[quizIdx].answer
+                  return (
+                    <button key={opt} onClick={() => handleQuizAnswer(opt)} disabled={!!answered}
+                      className={`rounded-lg border px-4 py-2.5 text-sm font-medium transition ${answered ? (isCorrect ? 'border-green-400 bg-green-500/20 text-green-300' : 'border-white/10 text-white/40') : 'border-amber-400/30 text-amber-100 hover:bg-amber-500/20'}`}>
+                      {opt}
+                    </button>
+                  )
+                })}
+              </div>
+              <div className="mt-4 flex items-center justify-between text-sm">
+                <span className="text-amber-300">Điểm: {quizScore}</span>
+                <div className="flex gap-2">
+                  {quizIdx > 0 && <button onClick={() => setQuizIdx(i => i - 1)} className="rounded-md border border-white/20 px-3 py-1 text-white/70 hover:text-white">← Trước</button>}
+                  {quizIdx < QUIZ_QUESTIONS.length - 1 && <button onClick={() => setQuizIdx(i => i + 1)} className="rounded-md border border-amber-400/40 px-3 py-1 text-amber-300 hover:bg-amber-500/10">Tiếp →</button>}
+                </div>
+              </div>
+            </div>
+          </Reveal>
+        )}
+
+        {/* Page 2: Trống đồng + Lam Kinh */}
+        {page === 1 && (
+          <Reveal>
+            <div className="grid gap-6 lg:grid-cols-2">
+              <div className="overflow-hidden rounded-2xl">
+                <img src="/images/lam-kinh.png" alt="Lam Kinh" className="w-full h-72 md:h-96 object-cover rounded-2xl" />
+              </div>
+              <div className="glass-dark rounded-2xl p-6 flex flex-col justify-center">
+                <h3 className="text-2xl font-bold text-amber-200">Trống Đồng Đông Sơn & Lam Kinh</h3>
+                <p className="mt-3 text-white/85 leading-relaxed">Biểu tượng của văn minh Việt cổ, phản ánh đời sống vật chất và tinh thần rực rỡ của cư dân Lạc Việt xưa. Lam Kinh là kinh đô thứ hai của nhà Hậu Lê, nơi đây dâng trào hào khí giữ nước.</p>
+                <div className="mt-4 flex items-center gap-4">
+                  <img src="/images/trong-dong.png" alt="Trống đồng" className="h-20 w-20 rounded-full object-cover border-2 border-amber-400/50" />
+                  <p className="text-sm text-amber-100/70 italic">Trống đồng Đông Sơn - báu vật quốc gia</p>
+                </div>
+              </div>
+            </div>
+          </Reveal>
+        )}
+
+        {/* Page 3: Nem chua product */}
+        {page === 2 && (
+          <Reveal>
+            <div className="glass-dark rounded-2xl overflow-hidden">
+              <div className="grid lg:grid-cols-2">
+                <div className="relative p-8 flex flex-col justify-center">
+                  <p className="text-xs uppercase tracking-widest text-amber-400/80">Đặc sản xứ Thanh</p>
+                  <h3 className="mt-2 text-3xl font-bold text-amber-100" style={{ fontFamily: 'Georgia, serif' }}>Nem Chua Thanh Hóa</h3>
+                  <p className="mt-2 text-amber-100/70 italic" style={{ fontFamily: 'Georgia, serif' }}>Vị chua thanh, cay nồng - Gói trọn nghĩa tình xứ Thanh</p>
+
+                  <div className="mt-4 flex gap-4">
+                    {[{ icon: '🌿', text: '100% Tự nhiên' }, { icon: '🛡️', text: 'Không chất bảo quản' }, { icon: '🚀', text: 'Giao hàng siêu tốc' }].map(f => (
+                      <div key={f.text} className="text-center">
+                        <span className="text-xl">{f.icon}</span>
+                        <p className="text-[10px] text-white/60 mt-1">{f.text}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="mt-4 space-y-1 text-sm text-white/70">
+                    <p>• Lên men tự nhiên</p>
+                    <p>• Giòn dai sần sật</p>
+                    <p>• Khối lượng: 10 cái</p>
+                  </div>
+
+                  <p className="mt-4 text-3xl font-bold text-amber-300">50.000đ</p>
+                  <p className="text-xs text-white/50">Đã có 156 người đặt mua trong tuần này</p>
+
+                  <button onClick={() => setOrderOpen(true)} className="btn-shine mt-4 rounded-xl bg-gradient-to-r from-red-600 to-orange-500 px-6 py-3 font-bold text-white shadow-lg">
+                    TRẢI NGHIỆM VỊ QUÊ
+                  </button>
+                </div>
+                <div className="relative min-h-[300px] bg-gradient-to-br from-red-900/50 to-red-800/30 flex items-center justify-center p-8">
+                  <img src="https://images.unsplash.com/photo-1600891963935-c1a1f4dcf04b?q=80&w=800&auto=format&fit=crop" alt="Nem chua Thanh Hóa" className="max-h-80 rounded-2xl object-cover shadow-2xl" />
+                  <div className="product-badge">Độc quyền<br/>3 Công Chúa</div>
+                </div>
+              </div>
+            </div>
+          </Reveal>
+        )}
+
+        <ProgressBar steps={stepLabels} current={page} onNav={setPage} color="#fbbf24" />
+      </div>
+      <OrderModal open={orderOpen} onClose={() => setOrderOpen(false)} productName="Nem Chua Thanh Hóa" accentColor="#dc2626" />
+    </section>
+  )
+}
+
+/* ====================================================================
+   QUẢNG NINH SECTION
+   ==================================================================== */
+function QuangNinhSection() {
+  const [page, setPage] = useState(0)
+  const [selectedIsland, setSelectedIsland] = useState<string | null>(null)
+  const [orderOpen, setOrderOpen] = useState(false)
+
+  const islands = [
+    { id: 'tuan-chau', name: 'Đảo Tuần Châu', x: '35%', y: '55%', text: 'Tuần Châu là điểm du lịch biển nổi bật, thuận tiện để bắt đầu hành trình khám phá Vịnh Hạ Long.', image: '/images/dao-tuan-chau.png' },
+    { id: 'ngoc-vung', name: 'Đảo Ngọc Vừng', x: '62%', y: '30%', text: 'Ngọc Vừng sở hữu bãi biển hoang sơ, nước trong xanh và không gian yên bình.', image: '/images/dao-ngoc-vung.png' },
+    { id: 'ti-top', name: 'Đảo Ti Tốp', x: '50%', y: '42%', text: 'Đảo Ti Tốp nổi tiếng với bãi tắm đẹp và điểm ngắm toàn cảnh Vịnh Hạ Long từ trên cao.', image: '/images/dao-ti-top.png' },
+  ]
+
+  const heritage = [
+    { name: 'Vịnh Hạ Long', image: '/images/vinh-ha-long.png', desc: 'Di sản thiên nhiên thế giới với hệ sinh thái biển phong phú và hàng nghìn đảo đá vôi kỳ vĩ.' },
+    { name: 'Sông Bạch Đằng', image: '/images/song-bach-dang.png', desc: 'Địa danh lịch sử gắn với các chiến thắng lẫy lừng chống quân xâm lược phương Bắc.' },
+    { name: 'Núi Yên Tử', image: '/images/nui-yen-tu.png', desc: 'Trung tâm văn hóa Phật giáo Trúc Lâm, điểm hành hương nổi tiếng của Việt Nam.' },
+  ]
+
+  const stepLabels = ['Khám phá biển đảo', 'Di sản văn hóa', 'Carnaval Hạ Long', 'Đặc sản biển']
+
+  return (
+    <section id="quang-ninh" className="py-16 md:py-24 overflow-hidden" style={{ background: 'linear-gradient(135deg, #0c4a6e 0%, #075985 40%, #0c4a6e 100%)' }}>
+      <div className="mx-auto max-w-7xl px-4 md:px-6">
+        <Reveal>
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold text-cyan-200 md:text-4xl">Quảng Ninh: Kỳ Quan Biển Đảo</h2>
+            <p className="mt-2 text-cyan-100/70">Nơi hội tụ cảnh sắc thiên nhiên hùng vĩ, lịch sử chống ngoại xâm và những lễ hội biển sôi động.</p>
+          </div>
+        </Reveal>
+
+        {/* Page 1: Sea map with islands */}
+        {page === 0 && (
+          <Reveal>
+            <div className="glass-dark rounded-2xl overflow-hidden">
+              <div className="relative h-[400px] md:h-[500px]">
+                <img src="/images/ban-do-bien-qn.png" alt="Bản đồ biển Quảng Ninh" className="w-full h-full object-cover" />
+                {islands.map(p => (
+                  <button key={p.id} onClick={() => setSelectedIsland(p.id)} className={`absolute -translate-x-1/2 -translate-y-1/2 rounded-full border-2 transition-all ${selectedIsland === p.id ? 'border-amber-300 bg-amber-400 scale-125' : 'border-white bg-amber-500 hover:scale-110'} px-3 py-1.5 text-xs font-bold text-white shadow-lg`} style={{ left: p.x, top: p.y }}>
+                    {p.name}
+                  </button>
+                ))}
+              </div>
+              {selectedIsland && (() => {
+                const island = islands.find(i => i.id === selectedIsland)!
+                return (
+                  <div className="p-5 flex flex-col md:flex-row gap-4 items-center">
+                    <img src={island.image} alt={island.name} className="w-full md:w-64 h-40 rounded-xl object-cover" />
+                    <div>
+                      <h3 className="text-lg font-bold text-cyan-200">{island.name}</h3>
+                      <p className="mt-2 text-sm text-white/80">{island.text}</p>
+                    </div>
+                  </div>
+                )
+              })()}
+            </div>
+          </Reveal>
+        )}
+
+        {/* Page 2: Di sản & Văn hóa */}
+        {page === 1 && (
+          <Reveal>
+            <div className="grid gap-6 md:grid-cols-3">
+              {heritage.map((h, i) => (
+                <Reveal key={h.name} delay={i * 150}>
+                  <article className="glass-dark rounded-2xl overflow-hidden group">
+                    <div className="h-52 overflow-hidden">
+                      <img src={h.image} alt={h.name} className="w-full h-full object-cover transition group-hover:scale-105" />
+                    </div>
+                    <div className="p-5">
+                      <h3 className="text-lg font-bold text-cyan-200">{h.name}</h3>
+                      <p className="mt-2 text-sm text-white/75 leading-relaxed">{h.desc}</p>
+                    </div>
+                  </article>
+                </Reveal>
+              ))}
+            </div>
+          </Reveal>
+        )}
+
+        {/* Page 3: Carnaval Hạ Long */}
+        {page === 2 && (
+          <Reveal>
+            <div className="relative rounded-2xl overflow-hidden min-h-[500px]">
+              <img src="/images/vinh-ha-long.png" alt="Vịnh Hạ Long hoàng hôn" className="absolute inset-0 w-full h-full object-cover blur-sm" />
+              <div className="absolute inset-0 bg-gradient-to-t from-indigo-950/90 via-indigo-950/50 to-purple-900/30" />
+              <div className="relative z-10 flex flex-col items-center justify-center text-center p-8 min-h-[500px]">
+                <h3 className="text-3xl md:text-5xl font-extrabold text-amber-300" style={{ textShadow: '0 0 30px rgba(245,158,11,0.4)' }}>
+                  CARNAVAL HẠ LONG
+                </h3>
+                <p className="text-xl md:text-2xl font-bold text-white/90 mt-1">Vũ Điệu Của Biển</p>
+                <div className="glass mt-6 rounded-xl p-5 max-w-2xl">
+                  <p className="text-sm text-white/90 leading-relaxed">
+                    Thường tổ chức cuối tháng 4 – đầu tháng 5, là thời điểm đẹp để du lịch Hạ Long và hòa vào không khí lễ hội biển. Carnaval Hạ Long là sự kiện văn hóa – du lịch lớn nhất trong năm, thu hút hàng nghìn du khách trong và ngoài nước.
+                  </p>
+                </div>
+                <div className="mt-6 flex gap-4">
+                  <img src="/images/carnaval-1.png" alt="Carnaval 1" className="w-40 h-28 md:w-56 md:h-36 rounded-xl object-cover shadow-xl" />
+                  <img src="/images/carnaval-2.png" alt="Carnaval 2" className="w-40 h-28 md:w-56 md:h-36 rounded-xl object-cover shadow-xl" />
+                </div>
+              </div>
+            </div>
+          </Reveal>
+        )}
+
+        {/* Page 4: Chả mực product */}
+        {page === 3 && (
+          <Reveal>
+            <div className="rounded-2xl overflow-hidden" style={{ background: 'linear-gradient(135deg, #0d9488, #0891b2)' }}>
+              <div className="grid lg:grid-cols-2">
+                <div className="p-8 flex flex-col justify-center">
+                  <p className="text-xs uppercase tracking-widest text-teal-200/80">Đặc sản tuyển chọn - 3 Công Chúa</p>
+                  <h3 className="mt-2 text-3xl font-bold text-white" style={{ fontFamily: 'Georgia, serif' }}>Chả Mực – "Vàng Ròng" Từ Biển Cả</h3>
+                  <p className="mt-2 text-teal-100/80 italic" style={{ fontFamily: 'Georgia, serif' }}>Giã tay thủ công - Giữ trọn vị ngọt biển khơi Quảng Ninh</p>
+
+                  <div className="mt-4 flex gap-4">
+                    {[{ t: 'Sạch' }, { t: 'Chất' }, { t: 'Giòn Dai' }].map(f => (
+                      <span key={f.t} className="rounded-full border border-teal-300/40 bg-teal-400/10 px-3 py-1 text-xs text-teal-100">{f.t}</span>
+                    ))}
+                  </div>
+
+                  <div className="mt-4 space-y-1 text-sm text-white/70">
+                    <p>• 95% Mực tươi nguyên chất</p>
+                    <p>• Giã tay thủ công</p>
+                    <p>• Khối lượng: 500g</p>
+                  </div>
+
+                  <p className="mt-4 text-3xl font-bold text-amber-300">245.000đ</p>
+
+                  <button onClick={() => setOrderOpen(true)} className="btn-shine mt-4 rounded-xl bg-gradient-to-r from-teal-700 to-cyan-600 px-6 py-3 font-bold text-white shadow-lg w-fit">
+                    ĐẶT HÀNG NGAY
+                  </button>
+                </div>
+                <div className="relative min-h-[300px] flex items-center justify-center p-8 bg-teal-900/30">
+                  <img src="/images/cha-muc.png" alt="Chả mực Hạ Long" className="max-h-72 rounded-2xl object-contain drop-shadow-2xl" />
+                  <div className="product-badge" style={{ background: 'linear-gradient(135deg, #ffd700, #f59e0b)' }}>Đặc sản<br/>Tuyển chọn</div>
+                </div>
+              </div>
+            </div>
+          </Reveal>
+        )}
+
+        <ProgressBar steps={stepLabels} current={page} onNav={setPage} color="#22d3ee" />
+      </div>
+      <OrderModal open={orderOpen} onClose={() => setOrderOpen(false)} productName="Chả Mực Hạ Long" accentColor="#0d9488" />
+    </section>
+  )
+}
+
+/* ====================================================================
+   HƯNG YÊN SECTION
+   ==================================================================== */
+function HungYenSection() {
+  const [page, setPage] = useState(0)
+  const [orderOpen, setOrderOpen] = useState(false)
+
+  const stepLabels = ['Phố Hiến hoài cổ', 'Vườn nhãn cổ thụ', 'Long nhãn tiến vua']
+
+  return (
+    <section id="hung-yen" className="py-16 md:py-24 overflow-hidden" style={{ background: 'linear-gradient(135deg, #1a2e05 0%, #365314 40%, #1a2e05 100%)' }}>
+      <div className="mx-auto max-w-7xl px-4 md:px-6">
+        <Reveal>
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold text-emerald-200 md:text-4xl">Hưng Yên: Phố Hiến Xưa, Vị Ngọt Nhãn Lồng</h2>
+            <p className="mt-2 text-emerald-100/70">Nơi lưu giữ những nét đẹp văn hóa truyền thống qua hệ thống di tích, lễ hội và đặc sản nổi tiếng.</p>
+          </div>
+        </Reveal>
+
+        {/* Page 1: Phố Hiến */}
+        {page === 0 && (
+          <Reveal>
+            <div className="relative rounded-2xl overflow-hidden min-h-[500px]">
+              <img src="/images/cong-pho-hien.png" alt="Phố Hiến" className="absolute inset-0 w-full h-full object-cover" style={{ filter: 'blur(2px) brightness(0.4)' }} />
+              <div className="absolute inset-0 bg-gradient-to-r from-yellow-900/60 to-transparent" />
+              <div className="relative z-10 grid lg:grid-cols-2 gap-8 p-8 min-h-[500px] items-center">
+                <div>
+                  <div className="glass-gold rounded-2xl p-6">
+                    <h3 className="text-2xl font-bold text-teal-300" style={{ fontFamily: 'Georgia, serif' }}>PHỐ HIẾN – NÀNG THƠ HOÀI CỔ</h3>
+                    <div className="mt-4">
+                      <h4 className="font-bold text-amber-200">Thương Cảng Xưa Huy Hoàng</h4>
+                      <p className="mt-2 text-sm text-white/80 leading-relaxed">Phố Hiến từng là thương cảng sầm uất bậc nhất Đàng Ngoài, nơi giao thoa văn hóa Việt – Hoa – Nhật – phương Tây, để lại hệ thống di tích phong phú và đa dạng.</p>
+                    </div>
+                    <div className="mt-4">
+                      <h4 className="font-bold text-amber-200">Lễ Hội Phố Hiến</h4>
+                      <ul className="mt-2 space-y-1 text-sm text-white/75">
+                        <li>• Chùa Chuông: 15/1, 8/4, 15/4, 15/7 âm lịch</li>
+                        <li>• Chùa Keo: Hội Xuân mùng 4 tháng Giêng, Hội Thu tháng 9</li>
+                        <li>• Đền Mẫu Phố Hiến: 10-12/3 âm lịch</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex justify-center">
+                  <img src="/images/cong-pho-hien.png" alt="Cổng Phố Hiến" className="max-h-80 rounded-2xl object-cover shadow-2xl border-2 border-amber-400/30" />
+                </div>
+              </div>
+            </div>
+          </Reveal>
+        )}
+
+        {/* Page 2: Vườn Nhãn Cổ Thụ */}
+        {page === 1 && (
+          <Reveal>
+            <div className="relative rounded-2xl overflow-hidden min-h-[500px]">
+              <img src="/images/vuon-nhan.png" alt="Vườn nhãn" className="absolute inset-0 w-full h-full object-cover" style={{ filter: 'blur(2px) brightness(0.35)' }} />
+              <div className="absolute inset-0 bg-gradient-to-t from-yellow-950/80 to-amber-900/30" />
+              <div className="relative z-10 flex flex-col items-center justify-center text-center p-8 min-h-[500px]">
+                <h3 className="gradient-title text-3xl md:text-5xl font-extrabold">VƯỜN NHÃN CỔ THỤ 360°</h3>
+                <div className="glass-gold mt-6 rounded-2xl p-6 max-w-2xl">
+                  <h4 className="text-lg font-bold text-amber-200">Mảnh Đất Vàng Cho Những Hương Vị Đậm Đà</h4>
+                  <p className="mt-3 text-sm text-white/80 leading-relaxed">
+                    Khám phá vườn nhãn lồng Hưng Yên trải rộng, nơi những cây nhãn cổ thụ hàng trăm năm tuổi vẫn trĩu quả mỗi mùa. Đất phù sa sông Hồng tạo nên hương vị ngọt thanh đặc trưng không nơi nào có được.
+                  </p>
+                </div>
+                <div className="mt-6">
+                  <img src="/images/vuon-nhan.png" alt="Vườn nhãn 360" className="w-80 h-52 md:w-[500px] md:h-72 rounded-2xl object-cover shadow-2xl" />
+                </div>
+                <button onClick={() => setPage(2)} className="btn-shine mt-6 rounded-xl bg-gradient-to-r from-amber-600 to-yellow-500 px-6 py-3 font-bold text-white shadow-lg">
+                  Khám phá báu vật 🎁
+                </button>
+              </div>
+            </div>
+          </Reveal>
+        )}
+
+        {/* Page 3: Long Nhãn product */}
+        {page === 2 && (
+          <Reveal>
+            <div className="relative rounded-2xl overflow-hidden" style={{ background: 'linear-gradient(135deg, #78350f, #92400e, #78350f)' }}>
+              <div className="grid lg:grid-cols-2">
+                <div className="p-8 flex flex-col justify-center">
+                  <p className="text-xs uppercase tracking-widest text-amber-300/80">Sản vật tiến vua</p>
+                  <h3 className="mt-2 text-3xl font-bold gradient-title" style={{ fontFamily: 'Georgia, serif' }}>LONG NHÃN HƯNG YÊN</h3>
+                  <p className="mt-2 text-amber-200/80 italic" style={{ fontFamily: 'Georgia, serif' }}>Ngọt thanh như mật</p>
+
+                  <div className="mt-4 space-y-1 text-sm text-white/70">
+                    <p>• Long Nhãn Loại 1 - Ngọt Thanh Như Mật</p>
+                    <p>• Sấy khô tự nhiên</p>
+                    <p>• Không đường hóa học</p>
+                    <p>• Khối lượng: 300g</p>
+                  </div>
+
+                  <p className="mt-4 text-3xl font-bold text-amber-300" style={{ fontFamily: 'Georgia, serif' }}>195.000đ</p>
+
+                  <button onClick={() => setOrderOpen(true)} className="btn-shine mt-4 rounded-xl bg-gradient-to-r from-amber-600 to-yellow-500 px-6 py-3 font-bold text-white shadow-lg w-fit" style={{ fontFamily: 'Georgia, serif' }}>
+                    ĐẶT HÀNG NGAY
+                  </button>
+
+                  <div className="mt-4 glass-gold rounded-xl p-4">
+                    <p className="text-sm font-bold text-amber-200">🎁 MUA COMBO 3 TỈNH - GIÁ ƯU ĐÃI</p>
+                    <p className="text-2xl font-bold text-amber-300 mt-1">550.000đ</p>
+                    <p className="text-xs text-white/60 mt-1">Nem chua + Chả mực + Long nhãn</p>
+                  </div>
+                </div>
+                <div className="relative min-h-[350px] flex items-center justify-center p-8">
+                  <img src="/images/long-nhan.png" alt="Long nhãn Hưng Yên" className="max-h-80 rounded-2xl object-cover shadow-2xl" />
+                  <div className="product-badge">Sản vật<br/>Tiến Vua</div>
+                </div>
+              </div>
+            </div>
+          </Reveal>
+        )}
+
+        <ProgressBar steps={stepLabels} current={page} onNav={setPage} color="#34d399" />
+      </div>
+      <OrderModal open={orderOpen} onClose={() => setOrderOpen(false)} productName="Long Nhãn Hưng Yên" accentColor="#b45309" />
+    </section>
+  )
+}
+
+/* ====================================================================
+   GIAO LỘ ĐỊNH MỆNH
+   ==================================================================== */
+function GiaoLoDinhMenhSection() {
+  const coreValues = [
+    { name: 'Mở cơ hội', icon: '🚪' },
+    { name: 'Mở trí tuệ', icon: '💡' },
+    { name: 'Mở trái tim', icon: '❤️' },
+    { name: 'Mở tầm nhìn', icon: '🔭' },
+    { name: 'Mở tương lai', icon: '🌟' },
   ]
 
   return (
-    <section id="thanh-hoa" className="mx-auto max-w-7xl px-4 py-14 md:px-6 md:py-20">
-      <div className="mb-8 text-center">
-        <h2 className="text-2xl font-bold text-amber-950 md:text-4xl">Thanh Hóa – Vùng Đất Cội Nguồn</h2>
-        <p className="mt-3 text-amber-800/90">
-          Hành trình mở đầu với các dấu mốc lịch sử lớn, nơi tinh thần dựng nước và giữ nước được lưu giữ qua từng di tích.
-        </p>
+    <section id="giao-lo-dinh-menh" className="relative py-20 md:py-28 overflow-hidden bg-slate-950">
+      {/* Parallax-like background */}
+      <div className="absolute inset-0 opacity-20">
+        <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=1400&auto=format&fit=crop" alt="" className="w-full h-full object-cover" />
       </div>
+      <div className="absolute inset-0 bg-gradient-to-b from-slate-950/80 via-slate-950/60 to-slate-950/90" />
 
-      <div className="overflow-hidden rounded-2xl border border-amber-100 bg-white shadow-sm">
-        <img src={pages[page].image} alt={pages[page].title} className="h-64 w-full object-cover md:h-80" />
-        <div className="p-6">
-          <h3 className="text-xl font-bold text-amber-900">{pages[page].title}</h3>
-          <p className="mt-2 text-amber-800">{pages[page].text}</p>
+      <div className="relative z-10 mx-auto max-w-5xl px-4 text-center md:px-6">
+        <Reveal>
+          <h2 className="text-3xl font-extrabold text-amber-300 md:text-5xl" style={{ textShadow: '0 0 20px rgba(245,158,11,0.3)' }}>
+            GIAO LỘ ĐỊNH MỆNH
+          </h2>
+          <p className="mt-2 text-sm uppercase tracking-[0.2em] text-white/70">Khi những dòng chảy hội tụ về đại dương tri thức</p>
+        </Reveal>
 
-          <div className="mt-5 flex flex-wrap gap-2">
-            {pages.map((item, idx) => (
-              <button
-                key={item.title}
-                onClick={() => setPage(idx)}
-                className={`rounded-md px-3 py-1.5 text-sm ${
-                  idx === page
-                    ? 'bg-amber-600 text-white'
-                    : 'border border-amber-300 text-amber-700 hover:bg-amber-50'
-                }`}
-              >
-                Trang {idx + 1}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <div className="mt-8 grid gap-6 md:grid-cols-2">
-        <article className="rounded-2xl border border-amber-100 bg-amber-50/70 p-5">
-          <h3 className="text-lg font-bold text-amber-900">🏗️ Minigame: Xây Thành trong 3 phút</h3>
-          <p className="mt-2 text-sm text-amber-800">
-            Thu thập vật liệu để hoàn thiện thành. Mỗi lần bấm “Thu thập vật liệu” +10 điểm.
-          </p>
-
-          <div className="mt-4 space-y-2 text-sm text-amber-900">
-            <p>⏱️ Thời gian còn lại: {timeLeft}s</p>
-            <p>⭐ Điểm: {score}</p>
-            <p>
-              {done
-                ? score >= 100
-                  ? '🎉 Xuất sắc! Bạn đã xây thành công Thành Nhà Hồ!'
-                  : '⌛ Hết giờ! Thử lại để đạt từ 100 điểm nhé.'
-                : 'Hãy tích lũy điểm trước khi hết giờ!'}
+        <Reveal delay={200}>
+          <div className="glass mt-8 rounded-2xl p-6 text-left">
+            <p className="text-sm text-white/85 leading-relaxed">
+              Mang theo sự kiên cường của đất học Thanh Hóa, sức sống khoáng đạt của biển bạc Quảng Ninh, hay nét tinh tế từ phù sa Hưng Yên; định mệnh đã đưa ba tâm hồn đồng điệu gặp gỡ. Chúng mình không chỉ mang theo niềm tự hào quê hương, mà còn mang cả khát khao chinh phục những tầm cao mới, đem tri thức về xây dựng quê hương.
             </p>
           </div>
+        </Reveal>
 
-          <div className="mt-4 flex flex-wrap gap-2">
-            {!started && !done && (
-              <button
-                onClick={() => {
-                  setStarted(true)
-                  setScore(0)
-                  setTimeLeft(180)
-                }}
-                className="rounded-md bg-amber-600 px-3 py-2 text-sm font-medium text-white hover:bg-amber-700"
-              >
-                Bắt đầu
-              </button>
-            )}
-
-            {started && (
-              <button
-                onClick={() => setScore((s) => s + 10)}
-                className="rounded-md border border-amber-300 bg-white px-3 py-2 text-sm font-medium text-amber-800 hover:bg-amber-100"
-              >
-                Thu thập vật liệu (+10)
-              </button>
-            )}
-
-            {done && (
-              <button
-                onClick={() => {
-                  setDone(false)
-                  setStarted(false)
-                  setTimeLeft(180)
-                  setScore(0)
-                }}
-                className="rounded-md border border-amber-300 bg-white px-3 py-2 text-sm font-medium text-amber-800 hover:bg-amber-100"
-              >
-                Chơi lại
-              </button>
-            )}
-          </div>
-        </article>
-
-        <article className="rounded-2xl border border-amber-100 bg-white p-5">
-          <h3 className="text-lg font-bold text-amber-900">🧠 Quiz nhanh</h3>
-          <p className="mt-2 text-sm text-amber-800">Câu hỏi: Thành Nhà Hồ được xây dựng vào năm nào?</p>
-
-          <div className="mt-4 grid gap-2">
-            {['1397', '1400', '1428'].map((ans) => (
-              <button
-                key={ans}
-                onClick={() => alert(ans === '1397' ? '✅ Chính xác!' : '❌ Chưa đúng, thử lại nhé!')}
-                className="rounded-md border border-amber-300 px-3 py-2 text-left text-sm text-amber-900 hover:bg-amber-50"
-              >
-                {ans}
-              </button>
-            ))}
-          </div>
-        </article>
-      </div>
-
-      <div className="mt-8 rounded-xl border border-amber-200 bg-white p-5">
-        <h3 className="text-lg font-bold text-amber-900">🎁 Đặc sản tiêu biểu xứ Thanh</h3>
-        <div className="mt-4 grid gap-4 md:grid-cols-3">
-          {SAN_PHAM.filter((p) => p.province === 'thanh-hoa').map((sp) => (
-            <div key={sp.id} className="overflow-hidden rounded-xl border border-amber-100">
-              <img src={sp.image} alt={sp.name} className="h-36 w-full object-cover" />
-              <div className="p-3">
-                <h4 className="font-semibold text-amber-900">{sp.name}</h4>
-                <p className="mt-1 text-sm text-amber-800">{sp.desc}</p>
+        {/* 3 Princesses converging */}
+        <Reveal delay={400}>
+          <div className="mt-10 flex items-center justify-center gap-4 md:gap-8">
+            <div className="text-center">
+              <div className="glass rounded-full p-4 inline-block"><span className="text-3xl">🪘</span></div>
+              <p className="mt-2 text-xs text-amber-300/80">Thanh Hóa</p>
+            </div>
+            <div className="text-amber-400/60">→</div>
+            <div className="text-center">
+              <div className="rounded-full border-4 border-amber-400/60 p-2 inline-block" style={{ animation: 'pulse-glow 2s ease-in-out infinite' }}>
+                <img src="/images/logo-dh-mo.png" alt="Logo ĐH Mở" className="h-16 w-16 md:h-20 md:w-20 rounded-full object-contain bg-white p-1" />
+              </div>
+              <p className="mt-2 text-xs text-amber-300">Đại Học Mở</p>
+            </div>
+            <div className="text-amber-400/60">←</div>
+            <div className="text-center flex flex-col items-center gap-4">
+              <div>
+                <div className="glass rounded-full p-4 inline-block"><span className="text-3xl">🌊</span></div>
+                <p className="mt-2 text-xs text-cyan-300/80">Quảng Ninh</p>
               </div>
             </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  )
-}
-
-function QuangNinhSection() {
-  const [selected, setSelected] = useState<string | null>(null)
-  const points = [
-    {
-      id: 'tuan-chau',
-      name: 'Đảo Tuần Châu',
-      x: '40%',
-      y: '58%',
-      text: 'Tuần Châu là điểm du lịch biển nổi bật, thuận tiện để bắt đầu hành trình khám phá Vịnh Hạ Long.',
-    },
-    {
-      id: 'ngoc-vung',
-      name: 'Đảo Ngọc Vừng',
-      x: '67%',
-      y: '36%',
-      text: 'Ngọc Vừng sở hữu bãi biển hoang sơ, nước trong xanh và không gian yên bình.',
-    },
-    {
-      id: 'titop',
-      name: 'Đảo Ti Tốp',
-      x: '52%',
-      y: '42%',
-      text: 'Đảo Ti Tốp nổi tiếng với bãi tắm đẹp và điểm ngắm toàn cảnh Vịnh Hạ Long từ trên cao.',
-    },
-  ]
-
-  return (
-    <section id="quang-ninh" className="bg-sky-50/70 py-14 md:py-20">
-      <div className="mx-auto max-w-7xl px-4 md:px-6">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-sky-950 md:text-4xl">Quảng Ninh – Miền Kỳ Quan Biển Đảo</h2>
-          <p className="mt-3 text-sky-900/80">
-            Nơi hội tụ cảnh sắc thiên nhiên hùng vĩ, lịch sử chống ngoại xâm và những lễ hội biển sôi động.
-          </p>
-        </div>
-
-        <div className="mt-8 grid gap-6 lg:grid-cols-2">
-          <article className="overflow-hidden rounded-2xl border border-sky-100 bg-white shadow-sm">
-            <div className="relative h-[360px]">
-              <img
-                src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=1400&auto=format&fit=crop"
-                alt="Bản đồ minh họa Quảng Ninh"
-                className="h-full w-full object-cover"
-              />
-
-              {points.map((p) => (
-                <button
-                  key={p.id}
-                  onClick={() => setSelected(p.id)}
-                  className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-sky-600 px-2 py-1 text-xs font-semibold text-white shadow hover:bg-sky-700"
-                  style={{ left: p.x, top: p.y }}
-                >
-                  {p.name}
-                </button>
-              ))}
+          </div>
+          <div className="mt-2 flex justify-center">
+            <div className="text-center">
+              <div className="text-amber-400/60 rotate-90 inline-block mb-2">→</div>
+              <div className="glass rounded-full p-4 inline-block"><span className="text-3xl">🌾</span></div>
+              <p className="mt-2 text-xs text-emerald-300/80">Hưng Yên</p>
             </div>
+          </div>
+        </Reveal>
 
-            <div className="p-5">
-              <h3 className="text-lg font-bold text-sky-900">🗺️ Khám phá điểm đến</h3>
-              <p className="mt-2 text-sm text-sky-800">
-                Hãy bấm vào từng địa điểm để đọc nhanh thông tin nổi bật.
-              </p>
-              {selected && (
-                <div className="mt-3 rounded-lg bg-sky-50 p-3 text-sm text-sky-900">
-                  {points.find((p) => p.id === selected)?.text}
-                </div>
-              )}
-            </div>
-          </article>
-
-          <article className="rounded-2xl border border-sky-100 bg-white p-6 shadow-sm">
-            <h3 className="text-xl font-bold text-sky-900">Di tích & Giá trị văn hóa</h3>
-            <ul className="mt-3 space-y-2 text-sm text-sky-900/90">
-              <li>• Vịnh Hạ Long – di sản thiên nhiên thế giới với hệ sinh thái biển phong phú.</li>
-              <li>• Sông Bạch Đằng – địa danh lịch sử gắn với các chiến thắng lẫy lừng.</li>
-              <li>• Yên Tử – trung tâm văn hóa Phật giáo Trúc Lâm, điểm hành hương nổi tiếng.</li>
-            </ul>
-
-            <div className="mt-5 grid gap-3 sm:grid-cols-3">
-              {FESTIVAL_CARDS.map((f) => (
-                <div key={f.name} className="rounded-lg border border-sky-100 bg-sky-50 p-3">
-                  <p className="text-lg">{f.icon}</p>
-                  <h4 className="mt-1 text-sm font-semibold text-sky-900">{f.name}</h4>
-                  <p className="mt-1 text-xs leading-relaxed text-sky-800">{f.desc}</p>
-                </div>
-              ))}
-            </div>
-          </article>
-        </div>
-
-        <div className="mt-8 rounded-xl border border-sky-200 bg-white p-5">
-          <h3 className="text-lg font-bold text-sky-900">🎁 Đặc sản tiêu biểu Quảng Ninh</h3>
-          <div className="mt-4 grid gap-4 md:grid-cols-3">
-            {SAN_PHAM.filter((p) => p.province === 'quang-ninh').map((sp) => (
-              <div key={sp.id} className="overflow-hidden rounded-xl border border-sky-100">
-                <img src={sp.image} alt={sp.name} className="h-36 w-full object-cover" />
-                <div className="p-3">
-                  <h4 className="font-semibold text-sky-900">{sp.name}</h4>
-                  <p className="mt-1 text-sm text-sky-800">{sp.desc}</p>
-                </div>
+        {/* 5 chữ Mở */}
+        <Reveal delay={600}>
+          <h3 className="mt-12 text-sm uppercase tracking-[0.15em] text-amber-400/80 font-semibold">NGŨ MỞ</h3>
+          <div className="mt-4 flex flex-wrap justify-center gap-3">
+            {coreValues.map((v, i) => (
+              <div key={v.name} className="glass float-card rounded-xl px-5 py-3 text-center" style={{ animationDelay: `${i * 0.4}s` }}>
+                <span className="text-2xl">{v.icon}</span>
+                <p className="mt-1 text-xs font-semibold text-amber-200">{v.name}</p>
               </div>
             ))}
           </div>
-        </div>
+        </Reveal>
       </div>
     </section>
   )
 }
 
-function HungYenSection() {
-  const [shuffled, setShuffled] = useState<GameItem[]>(() => [...GAME_ITEMS].sort(() => Math.random() - 0.5))
-  const [score, setScore] = useState(0)
-  const [answered, setAnswered] = useState<Record<string, boolean>>({})
-
-  const handlePick = (item: GameItem, pick: 'hung-yen' | 'thai-binh') => {
-    if (answered[item.id]) return
-    const correct = item.province === pick
-    setAnswered((s) => ({ ...s, [item.id]: true }))
-    setScore((s) => s + (correct ? 10 : 0))
-  }
-
-  const done = Object.keys(answered).length === shuffled.length
-
-  const reset = () => {
-    setShuffled([...GAME_ITEMS].sort(() => Math.random() - 0.5))
-    setScore(0)
-    setAnswered({})
-  }
-
-  return (
-    <section id="hung-yen" className="mx-auto max-w-7xl px-4 py-14 md:px-6 md:py-20">
-      <div className="text-center">
-        <h2 className="text-2xl font-bold text-emerald-950 md:text-4xl">Hưng Yên – Phố Hiến Xưa</h2>
-        <p className="mx-auto mt-3 max-w-4xl text-emerald-900/85">
-          Hưng Yên lưu giữ nét đẹp văn hóa truyền thống qua hệ thống di tích, lễ hội và đặc sản nổi tiếng. 
-          <strong>
-            {' '}Lễ hội chùa Chuông diễn ra vào 15/1, 8/4, 15/4, 15/7 âm lịch (trong đó 8-15/4 âm lịch là dịp Phật Đản chính hội);
-            Lễ hội chùa Keo diễn ra hai kỳ: Hội Xuân mùng 4 tháng Giêng và Hội Thu trung tuần tháng 9 âm lịch;
-            Lễ hội đền Mẫu Phố Hiến diễn ra hằng năm từ 10-12/3 âm lịch (có nơi ghi 10-15/3).
-          </strong>
-        </p>
-      </div>
-
-      <div className="mt-8 grid gap-6 lg:grid-cols-2">
-        <article className="overflow-hidden rounded-2xl border border-emerald-100 bg-white shadow-sm">
-          <img
-            src="https://images.unsplash.com/photo-1503919545889-aef636e10ad4?q=80&w=1200&auto=format&fit=crop"
-            alt="Phố Hiến Hưng Yên"
-            className="h-64 w-full object-cover"
-          />
-          <div className="p-5">
-            <h3 className="text-lg font-bold text-emerald-900">Di tích tiêu biểu</h3>
-            <ul className="mt-2 space-y-1.5 text-sm text-emerald-900/90">
-              <li>• Quần thể di tích Phố Hiến</li>
-              <li>• Chùa Chuông</li>
-              <li>• Đền Mẫu</li>
-              <li>• Văn Miếu Xích Đằng</li>
-            </ul>
-          </div>
-        </article>
-
-        <article className="rounded-2xl border border-emerald-100 bg-white p-5 shadow-sm">
-          <h3 className="text-lg font-bold text-emerald-900">🎮 Minigame phân loại đặc sản</h3>
-          <p className="mt-2 text-sm text-emerald-800">
-            Hưng Yên có nhiều đặc sản nổi tiếng. Bạn có thể phân loại đúng đặc sản thuộc về Hưng Yên hay Thái Bình không?
-          </p>
-
-          <p className="mt-3 text-sm font-semibold text-emerald-900">Điểm: {score}</p>
-
-          <div className="mt-4 space-y-3">
-            {shuffled.map((item) => (
-              <div key={item.id} className="rounded-lg border border-emerald-100 p-3">
-                <p className="font-medium text-emerald-900">{item.name}</p>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  <button
-                    onClick={() => handlePick(item, 'hung-yen')}
-                    disabled={!!answered[item.id]}
-                    className="rounded-md border border-emerald-300 px-3 py-1.5 text-sm text-emerald-800 hover:bg-emerald-50 disabled:opacity-50"
-                  >
-                    Hưng Yên
-                  </button>
-                  <button
-                    onClick={() => handlePick(item, 'thai-binh')}
-                    disabled={!!answered[item.id]}
-                    className="rounded-md border border-emerald-300 px-3 py-1.5 text-sm text-emerald-800 hover:bg-emerald-50 disabled:opacity-50"
-                  >
-                    Thái Bình
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {done && (
-            <div className="mt-4 rounded-lg bg-emerald-50 p-3 text-sm text-emerald-900">
-              ✅ Hoàn thành! Tổng điểm của bạn: <strong>{score}</strong>
-            </div>
-          )}
-
-          <button
-            onClick={reset}
-            className="mt-4 rounded-md bg-emerald-600 px-3 py-2 text-sm font-medium text-white hover:bg-emerald-700"
-          >
-            Chơi lại
-          </button>
-        </article>
-      </div>
-
-      <div className="mt-8 rounded-xl border border-emerald-200 bg-white p-5">
-        <h3 className="text-lg font-bold text-emerald-900">🎁 Đặc sản tiêu biểu Hưng Yên</h3>
-        <div className="mt-4 grid gap-4 md:grid-cols-3">
-          {SAN_PHAM.filter((p) => p.province === 'hung-yen').map((sp) => (
-            <div key={sp.id} className="overflow-hidden rounded-xl border border-emerald-100">
-              <img src={sp.image} alt={sp.name} className="h-36 w-full object-cover" />
-              <div className="p-3">
-                <h4 className="font-semibold text-emerald-900">{sp.name}</h4>
-                <p className="mt-1 text-sm text-emerald-800">{sp.desc}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  )
-}
-
-function GiaoLoDinhMenhSection() {
-  return (
-    <section id="giao-lo-dinh-menh" className="relative overflow-hidden py-16 md:py-24">
-      <div className="absolute inset-0 bg-[linear-gradient(120deg,#b91c1c_0%,#b91c1c_30%,#14532d_45%,#14532d_65%,#eab308_80%,#facc15_100%)] opacity-90" />
-      <div className="absolute -left-24 -top-24 h-72 w-72 rounded-full bg-red-400/40 blur-3xl animate-pulse" />
-      <div className="absolute -right-24 top-16 h-80 w-80 rounded-full bg-emerald-400/35 blur-3xl animate-pulse" />
-      <div className="absolute bottom-0 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-yellow-300/35 blur-3xl animate-pulse" />
-
-      <div className="relative mx-auto max-w-5xl px-4 text-center text-white md:px-6">
-        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-white/90">Hành trình hội tụ</p>
-        <h2 className="mt-3 text-3xl font-extrabold leading-tight drop-shadow md:text-5xl">GIAO LỘ ĐỊNH MỆNH</h2>
-
-        <p className="mx-auto mt-4 max-w-3xl text-sm font-semibold uppercase tracking-wide text-white/90 md:text-base">
-          KHI NHỮNG DÒNG CHẢY HỘI TỤ VỀ ĐẠI DƯƠNG TRI THỨC
-        </p>
-
-        <p className="mx-auto mt-5 max-w-4xl rounded-xl bg-black/20 p-4 text-left text-sm leading-relaxed text-white/95 md:text-base">
-          {'>'} Mang theo sự kiên cường của đất học Thanh Hóa, sức sống khoáng đạt của biển bạc Quảng Ninh, hay nét tinh tế từ phù sa Hưng Yên; định mệnh đã đưa ba tâm hồn đồng điệu gặp gỡ. Chúng mình không chỉ mang theo niềm tự hào quê hương, mà còn mang cả khát khao chinh phục những tầm cao mới, đem tri thức về xây dựng quê hương.
-        </p>
-
-        <div className="mx-auto mt-8 w-full max-w-sm rounded-2xl border border-white/40 bg-white/15 p-4 backdrop-blur">
-          <img
-            src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=900&auto=format&fit=crop"
-            alt="Ảnh tạm logo Đại học Mở"
-            className="h-40 w-full rounded-lg object-cover shadow-lg md:h-48"
-          />
-          <p className="mt-3 text-xs text-white/90">Logo Đại học Mở (ảnh tạm – sẽ thay ảnh chính thức theo file bạn gửi sau)</p>
-        </div>
-      </div>
-    </section>
-  )
-}
-
+/* ====================================================================
+   ĐẠI HỌC MỞ HÀ NỘI
+   ==================================================================== */
 function DaiHocMoSection() {
-  const coreValues = ['Mở cơ hội', 'Mở trái tim', 'Mở trí tuệ', 'Mở tầm nhìn', 'Mở tương lai']
-
   return (
     <section id="dai-hoc-mo" className="bg-slate-900 py-14 text-white md:py-20">
       <div className="mx-auto max-w-7xl px-4 md:px-6">
         <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
-          <div>
-            <h2 className="text-2xl font-bold md:text-4xl">🎓 Đại học Mở Hà Nội</h2>
-            <p className="mt-3 text-slate-200">
-              Đại học Mở Hà Nội là cơ sở giáo dục đại học công lập đa ngành, định hướng mở rộng cơ hội học tập, phát triển năng lực thực tiễn và hội nhập.
-            </p>
-
-            <div className="mt-5 grid gap-3 sm:grid-cols-2">
-              {[
-                'Hơn 37.000 sinh viên đang theo học',
-                'Môi trường học tập năng động và linh hoạt',
-                'Đào tạo gắn với nhu cầu xã hội',
-                'Khuyến khích đổi mới sáng tạo',
-              ].map((item) => (
-                <div key={item} className="rounded-lg border border-slate-700 bg-slate-800/70 p-3 text-sm text-slate-100">
-                  ✅ {item}
+          <Reveal>
+            <div>
+              <div className="flex items-center gap-3 mb-4">
+                <img src="/images/logo-dh-mo.png" alt="Logo ĐH Mở" className="h-14 w-14 rounded-full object-contain bg-white p-1 border-2 border-amber-400/50" />
+                <div>
+                  <h2 className="text-2xl font-bold md:text-4xl">Đại học Mở Hà Nội</h2>
+                  <p className="text-sm text-amber-300/80">Nơi Tri Thức Bay Cao, Kiến Tạo Tương Lai</p>
                 </div>
-              ))}
+              </div>
+              <p className="mt-3 text-slate-200">
+                Đại học Mở Hà Nội là cơ sở giáo dục đại học công lập đa ngành, định hướng mở rộng cơ hội học tập, phát triển năng lực thực tiễn và hội nhập.
+              </p>
+
+              <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                {['Hơn 37.000 sinh viên đang theo học', 'Môi trường học tập năng động và linh hoạt', 'Đào tạo gắn với nhu cầu xã hội', 'Khuyến khích đổi mới sáng tạo'].map(item => (
+                  <div key={item} className="rounded-lg border border-slate-700 bg-slate-800/70 p-3 text-sm text-slate-100">
+                    ✅ {item}
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+          </Reveal>
 
-          <div className="rounded-2xl border border-slate-700 bg-slate-800/80 p-6">
-            <h3 className="text-xl font-bold">Khoa Kinh tế</h3>
-            <p className="mt-2 text-sm text-slate-200">
-              Đào tạo nguồn nhân lực kinh tế chất lượng cao với ba ngành trọng tâm, phát triển tư duy quản trị và năng lực nghề nghiệp.
-            </p>
+          <Reveal delay={200}>
+            <div className="rounded-2xl border border-slate-700 bg-slate-800/80 p-6">
+              <h3 className="text-xl font-bold">Khoa Kinh tế</h3>
+              <p className="mt-2 text-sm text-slate-200">
+                Đào tạo nguồn nhân lực kinh tế chất lượng cao với ba ngành trọng tâm, phát triển tư duy quản trị và năng lực nghề nghiệp.
+              </p>
 
-            <ul className="mt-4 space-y-2 text-sm text-slate-100">
-              <li>• Quản trị kinh doanh</li>
-              <li>• Kế toán</li>
-              <li>• Thương mại điện tử</li>
-            </ul>
+              <ul className="mt-4 space-y-2 text-sm text-slate-100">
+                <li>• Quản trị kinh doanh</li>
+                <li>• Kế toán</li>
+                <li>• Thương mại điện tử</li>
+              </ul>
 
-            <h4 className="mt-5 text-sm font-semibold uppercase tracking-wide text-amber-300">5 chữ MỞ</h4>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {coreValues.map((v) => (
-                <span key={v} className="rounded-full border border-amber-400/40 bg-amber-400/10 px-3 py-1 text-xs text-amber-200">
-                  {v}
-                </span>
-              ))}
+              <h4 className="mt-5 text-sm font-semibold uppercase tracking-wide text-amber-300">5 chữ MỞ</h4>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {['Mở cơ hội', 'Mở trái tim', 'Mở trí tuệ', 'Mở tầm nhìn', 'Mở tương lai'].map(v => (
+                  <span key={v} className="rounded-full border border-amber-400/40 bg-amber-400/10 px-3 py-1 text-xs text-amber-200">{v}</span>
+                ))}
+              </div>
             </div>
-          </div>
+          </Reveal>
         </div>
       </div>
     </section>
   )
 }
 
+/* ====================================================================
+   FOOTER
+   ==================================================================== */
 function Footer() {
   return (
     <footer id="lien-he" className="bg-amber-950 py-12 text-amber-100">
       <div className="mx-auto grid max-w-7xl gap-8 px-4 md:grid-cols-3 md:px-6">
         <div>
-          <h3 className="text-lg font-bold">🏛️ Vọng Âm Quá Khứ</h3>
+          <div className="flex items-center gap-2">
+            <img src="/logo-3-cong-chua.jpg" alt="Logo" className="h-10 w-10 rounded-full object-cover border-2 border-amber-400/50" />
+            <h3 className="text-lg font-bold">Vọng Âm Quá Khứ</h3>
+          </div>
           <p className="mt-2 text-sm text-amber-200/90">
             Hành trình di sản của 3 Công Chúa – kết nối lịch sử, văn hóa và giáo dục bằng trải nghiệm số.
           </p>
@@ -768,45 +906,19 @@ function Footer() {
         <div>
           <h4 className="font-semibold">Điều hướng</h4>
           <ul className="mt-2 space-y-1 text-sm">
-            {[
-              ['Giới thiệu', '#gioi-thieu'],
-              ['Bản đồ', '#ban-do'],
-              ['Thanh Hóa', '#thanh-hoa'],
-              ['Quảng Ninh', '#quang-ninh'],
-              ['Hưng Yên', '#hung-yen'],
-              ['Giao lộ định mệnh', '#giao-lo-dinh-menh'],
-              ['Đại học Mở', '#dai-hoc-mo'],
-            ].map(([label, href]) => (
-              <li key={href}>
-                <a href={href} className="text-amber-200/90 hover:text-white">
-                  {label}
-                </a>
-              </li>
+            {[['Giới thiệu', '#gioi-thieu'], ['Thanh Hóa', '#thanh-hoa'], ['Quảng Ninh', '#quang-ninh'], ['Hưng Yên', '#hung-yen'], ['Giao lộ định mệnh', '#giao-lo-dinh-menh'], ['Đại học Mở', '#dai-hoc-mo']].map(([label, href]) => (
+              <li key={href}><a href={href} className="text-amber-200/90 hover:text-white">{label}</a></li>
             ))}
           </ul>
         </div>
 
         <div>
           <h4 className="font-semibold">Liên hệ</h4>
-          <form className="mt-3 space-y-2">
-            <input
-              className="w-full rounded-md border border-amber-700 bg-amber-900/30 px-3 py-2 text-sm text-white placeholder:text-amber-300/70"
-              placeholder="Họ và tên"
-            />
-            <input
-              className="w-full rounded-md border border-amber-700 bg-amber-900/30 px-3 py-2 text-sm text-white placeholder:text-amber-300/70"
-              placeholder="Email"
-            />
-            <textarea
-              className="w-full rounded-md border border-amber-700 bg-amber-900/30 px-3 py-2 text-sm text-white placeholder:text-amber-300/70"
-              placeholder="Nội dung"
-              rows={3}
-            />
-            <button
-              type="button"
-              onClick={() => alert('Cảm ơn bạn! Chúng tôi đã nhận thông tin.')}
-              className="rounded-md bg-amber-500 px-4 py-2 text-sm font-semibold text-amber-950 hover:bg-amber-400"
-            >
+          <form className="mt-3 space-y-2" onSubmit={e => e.preventDefault()}>
+            <input className="w-full rounded-md border border-amber-700 bg-amber-900/30 px-3 py-2 text-sm text-white placeholder:text-amber-300/70 outline-none focus:border-amber-500" placeholder="Họ và tên" />
+            <input className="w-full rounded-md border border-amber-700 bg-amber-900/30 px-3 py-2 text-sm text-white placeholder:text-amber-300/70 outline-none focus:border-amber-500" placeholder="Email" />
+            <textarea className="w-full rounded-md border border-amber-700 bg-amber-900/30 px-3 py-2 text-sm text-white placeholder:text-amber-300/70 outline-none focus:border-amber-500" placeholder="Nội dung" rows={3} />
+            <button type="button" onClick={() => alert('Cảm ơn bạn! Chúng tôi đã nhận thông tin.')} className="rounded-md bg-amber-500 px-4 py-2 text-sm font-semibold text-amber-950 hover:bg-amber-400">
               Gửi liên hệ
             </button>
           </form>
@@ -814,19 +926,22 @@ function Footer() {
       </div>
 
       <p className="mt-8 text-center text-xs text-amber-200/70">
-        © {new Date().getFullYear()} Đội thi 3 công. All rights reserved.
+        © {new Date().getFullYear()} Đội thi 3 Công Chúa. All rights reserved.
       </p>
     </footer>
   )
 }
 
+/* ====================================================================
+   APP
+   ==================================================================== */
 export default function App() {
   return (
-    <div className="min-h-screen bg-white text-slate-900">
+    <div className="min-h-screen bg-slate-950 text-white">
       <Header />
+      <SideNav />
       <HeroSection />
       <PrincessesSection />
-      <BanDoSection />
       <ThanhHoaSection />
       <QuangNinhSection />
       <HungYenSection />
