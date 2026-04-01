@@ -191,6 +191,15 @@
   backdrop-filter: blur(4px);
 }
 
+/* ===== Reduced motion ===== */
+@media (prefers-reduced-motion: reduce) {
+  .gradient-title,
+  .btn-shine::after,
+  .float-card { animation: none; }
+  .h-accordion-item { transition: none; }
+  .progress-bar-fill { transition: none; }
+}
+
 /* ===== Product badge ===== */
 .product-badge {
   position: absolute;

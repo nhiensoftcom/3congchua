@@ -1,4 +1,13 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode, type ComponentType } from 'react'
+import {
+  Landmark, Waves, Wheat, GraduationCap,
+  Leaf, ShieldCheck, Truck,
+  Brain, Star, PartyPopper,
+  DoorOpen, Lightbulb, Heart, Eye, Sparkles,
+  Menu as MenuIcon, X as XIcon, Gift, CheckCircle,
+  ChevronLeft, ChevronRight,
+  type LucideProps,
+} from 'lucide-react'
 
 /* ====================================================================
    TYPES
@@ -18,11 +27,11 @@ const NAV_ITEMS = [
   { label: 'Liên Hệ', href: '#lien-he' },
 ]
 
-const SIDE_NAV_ITEMS = [
-  { id: 'thanh-hoa', label: 'Thanh Hóa', icon: '🪘' },
-  { id: 'quang-ninh', label: 'Quảng Ninh', icon: '🌊' },
-  { id: 'hung-yen', label: 'Hưng Yên', icon: '🍈' },
-  { id: 'dai-hoc-mo', label: 'Đại Học Mở', icon: '🎓' },
+const SIDE_NAV_ITEMS: { id: string; label: string; Icon: ComponentType<LucideProps> }[] = [
+  { id: 'thanh-hoa', label: 'Thanh Hóa', Icon: Landmark },
+  { id: 'quang-ninh', label: 'Quảng Ninh', Icon: Waves },
+  { id: 'hung-yen', label: 'Hưng Yên', Icon: Wheat },
+  { id: 'dai-hoc-mo', label: 'Đại Học Mở', Icon: GraduationCap },
 ]
 
 const PRINCESSES = [
@@ -130,7 +139,7 @@ function ProgressBar({ steps, current, onNav, color }: { steps: string[]; curren
             {s}
           </button>
         ))}
-        <span className="text-lg">🎁</span>
+        <Gift className="h-5 w-5 text-amber-300" />
       </div>
     </div>
   )
@@ -150,7 +159,7 @@ function OrderModal({ open, onClose, productName, accentColor }: { open: boolean
       <div className="glass-dark rounded-2xl p-6 w-full max-w-md mx-4 text-white" onClick={e => e.stopPropagation()}>
         {submitted ? (
           <div className="text-center py-8">
-            <div className="text-5xl mb-4">🎉</div>
+            <PartyPopper className="h-12 w-12 mx-auto mb-4 text-amber-300" />
             <h3 className="text-xl font-bold mb-2">Cảm ơn bạn!</h3>
             <p className="text-sm text-white/80">Cảm ơn bạn đã đồng hành cùng 3 Công Chúa giữ gìn tinh hoa Việt. Đơn hàng đang được chuẩn bị!</p>
             <button onClick={handleClose} className="mt-6 rounded-lg px-6 py-2 text-sm font-semibold text-white" style={{ background: accentColor }}>Đóng</button>
@@ -187,8 +196,8 @@ function SideNav() {
       {SIDE_NAV_ITEMS.map(item => {
         const isActive = active === item.id
         return (
-          <a key={item.id} href={`#${item.id}`} className={`flex flex-col items-center gap-1 rounded-lg px-2 py-2 text-center transition ${isActive ? 'bg-amber-500/20 text-amber-300' : 'text-white/60 hover:text-white/90'}`}>
-            <span className="text-lg">{item.icon}</span>
+          <a key={item.id} href={`#${item.id}`} className={`flex flex-col items-center gap-1 rounded-lg px-2 py-2 text-center transition cursor-pointer ${isActive ? 'bg-amber-500/20 text-amber-300' : 'text-white/60 hover:text-white/90'}`}>
+            <item.Icon className="h-5 w-5" />
             <span className="text-[9px] font-semibold leading-tight">{item.label}</span>
           </a>
         )
@@ -224,8 +233,8 @@ function Header() {
           ))}
         </nav>
 
-        <button onClick={() => setOpen(v => !v)} className="rounded-md border border-amber-400/50 px-3 py-1.5 text-sm text-amber-300 lg:hidden" aria-label="Menu">
-          {open ? '✕' : '☰'}
+        <button onClick={() => setOpen(v => !v)} className="rounded-md border border-amber-400/50 p-2 text-amber-300 lg:hidden cursor-pointer" aria-label="Menu">
+          {open ? <XIcon className="h-5 w-5" /> : <MenuIcon className="h-5 w-5" />}
         </button>
       </div>
 
@@ -331,13 +340,21 @@ function PrincessesSection() {
 function ThanhHoaSection() {
   const [page, setPage] = useState(0)
   const [accActive, setAccActive] = useState(0)
+  const [subSlide, setSubSlide] = useState(0) // sub-navigation within "Di tích lịch sử"
   const [quizIdx, setQuizIdx] = useState(0)
   const [quizScore, setQuizScore] = useState(0)
   const [quizAnswered, setQuizAnswered] = useState<Record<number, boolean>>({})
   const [orderOpen, setOrderOpen] = useState(false)
 
+  // Sub-slides for "Di tích lịch sử" accordion item
+  const diTichSlides = [
+    { title: 'Thành Nhà Hồ', image: '/images/thanh-nha-ho.png', desc: 'Thành Nhà Hồ là di sản văn hóa thế giới UNESCO, được xây dựng năm 1397, là công trình thành đá độc đáo nhất Đông Nam Á.' },
+    { title: 'Lam Kinh', image: '/images/lam-kinh.png', desc: 'Lam Kinh là vùng đất linh thiêng gắn với triều Hậu Lê, kinh đô thứ hai nơi dâng trào hào khí giữ nước.' },
+    { title: 'Trống đồng Đông Sơn', image: '/images/trong-dong.png', desc: 'Biểu tượng của văn minh Việt cổ, phản ánh đời sống vật chất và tinh thần rực rỡ của cư dân Lạc Việt xưa.' },
+  ]
+
   const accItems = [
-    { title: 'Di tích lịch sử', image: '/images/thanh-nha-ho.png', desc: 'Thành Nhà Hồ là di sản văn hóa thế giới UNESCO, được xây dựng năm 1397. Lam Kinh là vùng đất linh thiêng gắn với triều Hậu Lê, mang đậm dấu ấn lịch sử dân tộc.' },
+    { title: 'Di tích lịch sử', image: diTichSlides[subSlide].image, desc: diTichSlides[subSlide].desc, hasSubNav: true },
     { title: 'Danh lam thắng cảnh', image: '/images/bien-sam-son.png', desc: 'Biển Sầm Sơn được bao bọc bởi núi Trường Lệ và đền Độc Cước, tạo nên cảnh quan hùng vĩ.' },
     { title: 'Người kiên cường', image: '/images/le-hoi-poon-poong.png', desc: 'Lễ hội Pôồn Pôông - nghi lễ dân gian đặc sắc của người Mường tại Thanh Hóa, thường tổ chức vào rằm tháng Giêng hoặc tháng Bảy, cầu mùa màng bội thu và nhân khang vật thịnh.' },
   ]
@@ -361,7 +378,7 @@ function ThanhHoaSection() {
           </div>
         </Reveal>
 
-        {/* Page 1: Horizontal Accordion + Quiz */}
+        {/* Page 1: Horizontal Accordion (Di tích with sub-nav, Thắng cảnh, Lễ hội) */}
         {page === 0 && (
           <Reveal>
             <div className="h-accordion">
@@ -371,18 +388,31 @@ function ThanhHoaSection() {
                   <div className="collapsed-title">{item.title}</div>
                   <div className="overlay-content">
                     <div className="glass-dark rounded-xl p-4">
-                      <h3 className="text-lg font-bold text-amber-200">{item.title}</h3>
+                      <h3 className="text-lg font-bold text-amber-200">{i === 0 ? diTichSlides[subSlide].title : item.title}</h3>
                       <p className="mt-2 text-sm text-white/85 leading-relaxed">{item.desc}</p>
+                      {/* Sub-navigation arrows within "Di tích lịch sử" */}
+                      {i === 0 && item.hasSubNav && (
+                        <div className="mt-3 flex items-center gap-2">
+                          <button onClick={e => { e.stopPropagation(); setSubSlide(s => Math.max(0, s - 1)) }} disabled={subSlide === 0} className="rounded-full border border-amber-400/40 p-1 text-amber-300 disabled:opacity-30 hover:bg-amber-500/20 cursor-pointer"><ChevronLeft className="h-4 w-4" /></button>
+                          <span className="text-xs text-amber-300/70">{subSlide + 1} / {diTichSlides.length}</span>
+                          <button onClick={e => { e.stopPropagation(); setSubSlide(s => Math.min(diTichSlides.length - 1, s + 1)) }} disabled={subSlide === diTichSlides.length - 1} className="rounded-full border border-amber-400/40 p-1 text-amber-300 disabled:opacity-30 hover:bg-amber-500/20 animate-pulse cursor-pointer"><ChevronRight className="h-4 w-4" /></button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
               ))}
             </div>
+          </Reveal>
+        )}
 
-            {/* Quiz */}
-            <div className="mt-8 glass-dark rounded-2xl p-6">
-              <h3 className="text-lg font-bold text-amber-200">🧠 Thử tài sử học nhí</h3>
-              <p className="mt-1 text-sm text-white/60">Câu {quizIdx + 1}/{QUIZ_QUESTIONS.length}: {QUIZ_QUESTIONS[quizIdx].q}</p>
+        {/* Page 2: Quiz "Thử tài sử học nhí" */}
+        {page === 1 && (
+          <Reveal>
+            <div className="glass-dark rounded-2xl p-6 md:p-8">
+              <h3 className="text-xl font-bold text-amber-200 flex items-center gap-2"><Brain className="h-6 w-6" /> Thử tài sử học nhí</h3>
+              <p className="mt-2 text-sm text-white/60">Trả lời các câu hỏi để khám phá thêm về lịch sử xứ Thanh!</p>
+              <p className="mt-4 text-sm text-white/80 font-medium">Câu {quizIdx + 1}/{QUIZ_QUESTIONS.length}: {QUIZ_QUESTIONS[quizIdx].q}</p>
               <div className="mt-4 grid gap-2 sm:grid-cols-3">
                 {QUIZ_QUESTIONS[quizIdx].options.map(opt => {
                   const answered = quizAnswered[quizIdx]
@@ -396,31 +426,17 @@ function ThanhHoaSection() {
                 })}
               </div>
               <div className="mt-4 flex items-center justify-between text-sm">
-                <span className="text-amber-300">Điểm: {quizScore}</span>
+                <span className="text-amber-300 flex items-center gap-1"><Star className="h-4 w-4" /> Điểm: {quizScore}</span>
                 <div className="flex gap-2">
-                  {quizIdx > 0 && <button onClick={() => setQuizIdx(i => i - 1)} className="rounded-md border border-white/20 px-3 py-1 text-white/70 hover:text-white">← Trước</button>}
-                  {quizIdx < QUIZ_QUESTIONS.length - 1 && <button onClick={() => setQuizIdx(i => i + 1)} className="rounded-md border border-amber-400/40 px-3 py-1 text-amber-300 hover:bg-amber-500/10">Tiếp →</button>}
+                  {quizIdx > 0 && <button onClick={() => setQuizIdx(i => i - 1)} className="flex items-center gap-1 rounded-md border border-white/20 px-3 py-1 text-white/70 hover:text-white cursor-pointer"><ChevronLeft className="h-4 w-4" /> Trước</button>}
+                  {quizIdx < QUIZ_QUESTIONS.length - 1 && <button onClick={() => setQuizIdx(i => i + 1)} className="flex items-center gap-1 rounded-md border border-amber-400/40 px-3 py-1 text-amber-300 hover:bg-amber-500/10 cursor-pointer">Tiếp <ChevronRight className="h-4 w-4" /></button>}
                 </div>
               </div>
-            </div>
-          </Reveal>
-        )}
-
-        {/* Page 2: Trống đồng + Lam Kinh */}
-        {page === 1 && (
-          <Reveal>
-            <div className="grid gap-6 lg:grid-cols-2">
-              <div className="overflow-hidden rounded-2xl">
-                <img src="/images/lam-kinh.png" alt="Lam Kinh" className="w-full h-72 md:h-96 object-cover rounded-2xl" />
-              </div>
-              <div className="glass-dark rounded-2xl p-6 flex flex-col justify-center">
-                <h3 className="text-2xl font-bold text-amber-200">Trống Đồng Đông Sơn & Lam Kinh</h3>
-                <p className="mt-3 text-white/85 leading-relaxed">Biểu tượng của văn minh Việt cổ, phản ánh đời sống vật chất và tinh thần rực rỡ của cư dân Lạc Việt xưa. Lam Kinh là kinh đô thứ hai của nhà Hậu Lê, nơi đây dâng trào hào khí giữ nước.</p>
-                <div className="mt-4 flex items-center gap-4">
-                  <img src="/images/trong-dong.png" alt="Trống đồng" className="h-20 w-20 rounded-full object-cover border-2 border-amber-400/50" />
-                  <p className="text-sm text-amber-100/70 italic">Trống đồng Đông Sơn - báu vật quốc gia</p>
+              {Object.keys(quizAnswered).length === QUIZ_QUESTIONS.length && (
+                <div className="mt-4 rounded-lg bg-amber-500/10 border border-amber-400/30 p-3 text-center text-sm text-amber-200">
+                  <span className="inline-flex items-center gap-1"><PartyPopper className="h-4 w-4 inline" /> Hoàn thành! Tổng điểm: <strong>{quizScore}/{QUIZ_QUESTIONS.length * 10}</strong></span>
                 </div>
-              </div>
+              )}
             </div>
           </Reveal>
         )}
@@ -436,9 +452,9 @@ function ThanhHoaSection() {
                   <p className="mt-2 text-amber-100/70 italic" style={{ fontFamily: 'Georgia, serif' }}>Vị chua thanh, cay nồng - Gói trọn nghĩa tình xứ Thanh</p>
 
                   <div className="mt-4 flex gap-4">
-                    {[{ icon: '🌿', text: '100% Tự nhiên' }, { icon: '🛡️', text: 'Không chất bảo quản' }, { icon: '🚀', text: 'Giao hàng siêu tốc' }].map(f => (
+                    {[{ Icon: Leaf, text: '100% Tự nhiên' }, { Icon: ShieldCheck, text: 'Không chất bảo quản' }, { Icon: Truck, text: 'Giao hàng siêu tốc' }].map(f => (
                       <div key={f.text} className="text-center">
-                        <span className="text-xl">{f.icon}</span>
+                        <f.Icon className="h-5 w-5 mx-auto text-amber-300" />
                         <p className="text-[10px] text-white/60 mt-1">{f.text}</p>
                       </div>
                     ))}
@@ -630,7 +646,7 @@ function HungYenSection() {
   const [page, setPage] = useState(0)
   const [orderOpen, setOrderOpen] = useState(false)
 
-  const stepLabels = ['Phố Hiến hoài cổ', 'Vườn nhãn cổ thụ', 'Long nhãn tiến vua']
+  const stepLabels = ['Phố Hiến nàng thơ', 'Vườn nhãn cổ thụ', 'Long nhãn tiến vua']
 
   return (
     <section id="hung-yen" className="py-16 md:py-24 overflow-hidden" style={{ background: 'linear-gradient(135deg, #1a2e05 0%, #365314 40%, #1a2e05 100%)' }}>
@@ -651,7 +667,7 @@ function HungYenSection() {
               <div className="relative z-10 grid lg:grid-cols-2 gap-8 p-8 min-h-[500px] items-center">
                 <div>
                   <div className="glass-gold rounded-2xl p-6">
-                    <h3 className="text-2xl font-bold text-teal-300" style={{ fontFamily: 'Georgia, serif' }}>PHỐ HIẾN – NÀNG THƠ HOÀI CỔ</h3>
+                    <h3 className="text-2xl font-bold text-teal-300" style={{ fontFamily: 'Georgia, serif' }}>PHỐ HIẾN – NÀNG THƠ CỦA TÔI</h3>
                     <div className="mt-4">
                       <h4 className="font-bold text-amber-200">Thương Cảng Xưa Huy Hoàng</h4>
                       <p className="mt-2 text-sm text-white/80 leading-relaxed">Phố Hiến từng là thương cảng sầm uất bậc nhất Đàng Ngoài, nơi giao thoa văn hóa Việt – Hoa – Nhật – phương Tây, để lại hệ thống di tích phong phú và đa dạng.</p>
@@ -692,7 +708,7 @@ function HungYenSection() {
                   <img src="/images/vuon-nhan.png" alt="Vườn nhãn 360" className="w-80 h-52 md:w-[500px] md:h-72 rounded-2xl object-cover shadow-2xl" />
                 </div>
                 <button onClick={() => setPage(2)} className="btn-shine mt-6 rounded-xl bg-gradient-to-r from-amber-600 to-yellow-500 px-6 py-3 font-bold text-white shadow-lg">
-                  Khám phá báu vật 🎁
+                  Khám phá báu vật <Gift className="inline h-5 w-5 ml-1" />
                 </button>
               </div>
             </div>
@@ -723,7 +739,7 @@ function HungYenSection() {
                   </button>
 
                   <div className="mt-4 glass-gold rounded-xl p-4">
-                    <p className="text-sm font-bold text-amber-200">🎁 MUA COMBO 3 TỈNH - GIÁ ƯU ĐÃI</p>
+                    <p className="text-sm font-bold text-amber-200 flex items-center gap-1"><Gift className="h-4 w-4" /> MUA COMBO 3 TỈNH - GIÁ ƯU ĐÃI</p>
                     <p className="text-2xl font-bold text-amber-300 mt-1">550.000đ</p>
                     <p className="text-xs text-white/60 mt-1">Nem chua + Chả mực + Long nhãn</p>
                   </div>
@@ -748,21 +764,16 @@ function HungYenSection() {
    GIAO LỘ ĐỊNH MỆNH
    ==================================================================== */
 function GiaoLoDinhMenhSection() {
-  const coreValues = [
-    { name: 'Mở cơ hội', icon: '🚪' },
-    { name: 'Mở trí tuệ', icon: '💡' },
-    { name: 'Mở trái tim', icon: '❤️' },
-    { name: 'Mở tầm nhìn', icon: '🔭' },
-    { name: 'Mở tương lai', icon: '🌟' },
+  const coreValues: { name: string; Icon: ComponentType<LucideProps> }[] = [
+    { name: 'Mở cơ hội', Icon: DoorOpen },
+    { name: 'Mở trí tuệ', Icon: Lightbulb },
+    { name: 'Mở trái tim', Icon: Heart },
+    { name: 'Mở tầm nhìn', Icon: Eye },
+    { name: 'Mở tương lai', Icon: Sparkles },
   ]
 
   return (
     <section id="giao-lo-dinh-menh" className="relative py-20 md:py-28 overflow-hidden bg-slate-950">
-      {/* Parallax-like background */}
-      <div className="absolute inset-0 opacity-20">
-        <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=1400&auto=format&fit=crop" alt="" className="w-full h-full object-cover" />
-      </div>
-      <div className="absolute inset-0 bg-gradient-to-b from-slate-950/80 via-slate-950/60 to-slate-950/90" />
 
       <div className="relative z-10 mx-auto max-w-5xl px-4 text-center md:px-6">
         <Reveal>
@@ -784,28 +795,28 @@ function GiaoLoDinhMenhSection() {
         <Reveal delay={400}>
           <div className="mt-10 flex items-center justify-center gap-4 md:gap-8">
             <div className="text-center">
-              <div className="glass rounded-full p-4 inline-block"><span className="text-3xl">🪘</span></div>
+              <div className="glass rounded-full p-4 inline-block"><Landmark className="h-8 w-8 text-amber-300" /></div>
               <p className="mt-2 text-xs text-amber-300/80">Thanh Hóa</p>
             </div>
-            <div className="text-amber-400/60">→</div>
+            <div className="text-amber-400/60"><ChevronRight className="h-5 w-5" /></div>
             <div className="text-center">
               <div className="rounded-full border-4 border-amber-400/60 p-2 inline-block" style={{ animation: 'pulse-glow 2s ease-in-out infinite' }}>
                 <img src="/images/logo-dh-mo.png" alt="Logo ĐH Mở" className="h-16 w-16 md:h-20 md:w-20 rounded-full object-contain bg-white p-1" />
               </div>
               <p className="mt-2 text-xs text-amber-300">Đại Học Mở</p>
             </div>
-            <div className="text-amber-400/60">←</div>
+            <div className="text-amber-400/60"><ChevronLeft className="h-5 w-5" /></div>
             <div className="text-center flex flex-col items-center gap-4">
               <div>
-                <div className="glass rounded-full p-4 inline-block"><span className="text-3xl">🌊</span></div>
+                <div className="glass rounded-full p-4 inline-block"><Waves className="h-8 w-8 text-cyan-300" /></div>
                 <p className="mt-2 text-xs text-cyan-300/80">Quảng Ninh</p>
               </div>
             </div>
           </div>
           <div className="mt-2 flex justify-center">
             <div className="text-center">
-              <div className="text-amber-400/60 rotate-90 inline-block mb-2">→</div>
-              <div className="glass rounded-full p-4 inline-block"><span className="text-3xl">🌾</span></div>
+              <div className="text-amber-400/60 rotate-90 inline-block mb-2"><ChevronRight className="h-5 w-5" /></div>
+              <div className="glass rounded-full p-4 inline-block"><Wheat className="h-8 w-8 text-emerald-300" /></div>
               <p className="mt-2 text-xs text-emerald-300/80">Hưng Yên</p>
             </div>
           </div>
@@ -817,7 +828,7 @@ function GiaoLoDinhMenhSection() {
           <div className="mt-4 flex flex-wrap justify-center gap-3">
             {coreValues.map((v, i) => (
               <div key={v.name} className="glass float-card rounded-xl px-5 py-3 text-center" style={{ animationDelay: `${i * 0.4}s` }}>
-                <span className="text-2xl">{v.icon}</span>
+                <v.Icon className="h-6 w-6 mx-auto text-amber-300" />
                 <p className="mt-1 text-xs font-semibold text-amber-200">{v.name}</p>
               </div>
             ))}
@@ -851,8 +862,8 @@ function DaiHocMoSection() {
 
               <div className="mt-5 grid gap-3 sm:grid-cols-2">
                 {['Hơn 37.000 sinh viên đang theo học', 'Môi trường học tập năng động và linh hoạt', 'Đào tạo gắn với nhu cầu xã hội', 'Khuyến khích đổi mới sáng tạo'].map(item => (
-                  <div key={item} className="rounded-lg border border-slate-700 bg-slate-800/70 p-3 text-sm text-slate-100">
-                    ✅ {item}
+                  <div key={item} className="flex items-start gap-2 rounded-lg border border-slate-700 bg-slate-800/70 p-3 text-sm text-slate-100">
+                    <CheckCircle className="h-4 w-4 shrink-0 mt-0.5 text-emerald-400" /> {item}
                   </div>
                 ))}
               </div>
