@@ -6,6 +6,7 @@ import {
   Heart,
   Menu as MenuIcon, X as XIcon, Gift,
   ChevronLeft, ChevronRight,
+  TrendingUp, Handshake, Rocket, BarChart3,
   type LucideProps,
 } from 'lucide-react'
 
@@ -267,12 +268,12 @@ function HeroSection() {
       {/* Content */}
       <div className="relative z-[3] text-center px-4 max-w-4xl mx-auto mt-16">
         <Reveal>
-          <h1 className="gradient-title text-5xl md:text-7xl lg:text-8xl font-extrabold leading-tight" style={{ lineHeight: '1.05' }}>
+          <h1 className="gradient-title glow-text text-5xl md:text-7xl lg:text-8xl font-extrabold leading-tight" style={{ fontFamily: "'Montserrat', sans-serif", lineHeight: '1.05' }}>
             Vọng Âm Quá Khứ
           </h1>
         </Reveal>
         <Reveal delay={200}>
-          <p className="mt-3 text-xl md:text-3xl lg:text-4xl font-bold text-white" style={{ textShadow: '0 0 8px rgba(245,197,66,0.55), 0 2px 8px rgba(0,0,0,0.35)' }}>
+          <p className="mt-3 text-xl md:text-3xl lg:text-4xl font-bold text-white" style={{ textShadow: '0 0 10px rgba(245,197,66,0.6), 0 0 20px rgba(245,197,66,0.4), 0 0 40px rgba(245,197,66,0.25), 0 2px 8px rgba(0,0,0,0.35)' }}>
             Hành Trình Di Sản Của 3 Công Chúa
           </p>
         </Reveal>
@@ -299,35 +300,44 @@ function HeroSection() {
 /* ====================================================================
    3 CÔNG CHÚA - LỜI TỰ SỰ TỪ TRÁI TIM
    ==================================================================== */
+const PRINCESS_COLORS: Record<Province, { border: string; shadow: string; hoverBorder: string; hoverShadow: string; glowClass: string }> = {
+  'thanh-hoa': { border: 'border-red-400/60', shadow: 'shadow-red-500/20', hoverBorder: 'group-hover:border-red-300', hoverShadow: 'group-hover:shadow-red-500/40', glowClass: 'glow-red' },
+  'quang-ninh': { border: 'border-cyan-400/60', shadow: 'shadow-cyan-500/20', hoverBorder: 'group-hover:border-cyan-300', hoverShadow: 'group-hover:shadow-cyan-500/40', glowClass: 'glow-cyan' },
+  'hung-yen': { border: 'border-emerald-400/60', shadow: 'shadow-emerald-500/20', hoverBorder: 'group-hover:border-emerald-300', hoverShadow: 'group-hover:shadow-emerald-500/40', glowClass: 'glow-emerald' },
+}
+
 function PrincessesSection() {
   return (
-    <section id="gioi-thieu" className="bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 py-16 md:py-24">
+    <section id="gioi-thieu" className="bg-white py-16 md:py-24">
       <div className="mx-auto max-w-7xl px-4 md:px-6">
         <Reveal>
           <div className="text-center">
-            <h2 className="text-3xl font-bold text-amber-300 md:text-4xl">3 Công Chúa: Lời Tự Sự Từ Trái Tim</h2>
-            <p className="mx-auto mt-3 max-w-3xl text-white/70">Mỗi công chúa là một người kể chuyện, dẫn bạn qua từng miền đất với góc nhìn riêng, giàu cảm xúc và đậm giá trị văn hóa.</p>
+            <h2 className="text-3xl font-bold text-amber-600 md:text-4xl">3 Công Chúa: Lời Tự Sự Từ Trái Tim</h2>
+            <p className="mx-auto mt-3 max-w-3xl text-gray-600">Mỗi công chúa là một người kể chuyện, dẫn bạn qua từng miền đất với góc nhìn riêng, giàu cảm xúc và đậm giá trị văn hóa.</p>
           </div>
         </Reveal>
 
         <div className="mt-10 grid gap-8 md:grid-cols-3">
-          {PRINCESSES.map((p, i) => (
-            <Reveal key={p.id} delay={i * 200}>
-              <article className="group text-center">
-                <div className="mx-auto mb-4 h-36 w-36 overflow-hidden rounded-full border-4 border-amber-400/60 shadow-lg shadow-amber-500/20 transition group-hover:border-amber-300 group-hover:shadow-amber-500/40">
-                  <img src={p.image} alt={p.name} className="h-full w-full object-cover transition group-hover:scale-110" />
-                </div>
-                <h3 className="text-lg font-bold text-amber-200">{p.name}</h3>
-                <p className="text-sm text-amber-400/80">{p.province}</p>
-                <div className="mt-3 glass-dark rounded-xl p-4 text-sm text-white/80 italic leading-relaxed">
-                  {p.quote}
-                </div>
-                <a href={`#${p.id}`} className="mt-4 inline-flex rounded-lg border border-amber-400/40 px-4 py-2 text-sm font-medium text-amber-300 transition hover:bg-amber-400/10">
-                  Xem quê hương tôi
-                </a>
-              </article>
-            </Reveal>
-          ))}
+          {PRINCESSES.map((p, i) => {
+            const colors = PRINCESS_COLORS[p.id]
+            return (
+              <Reveal key={p.id} delay={i * 200}>
+                <article className="group text-center">
+                  <div className={`mx-auto mb-4 h-36 w-36 overflow-hidden rounded-full border-4 ${colors.border} shadow-lg ${colors.shadow} transition ${colors.hoverBorder} ${colors.hoverShadow}`}>
+                    <img src={p.image} alt={p.name} className="h-full w-full object-cover transition group-hover:scale-110" />
+                  </div>
+                  <h3 className="text-lg font-bold text-amber-700">{p.name}</h3>
+                  <p className="text-sm text-amber-500">{p.province}</p>
+                  <div className="mt-3 bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm text-gray-600 italic leading-relaxed">
+                    {p.quote}
+                  </div>
+                  <a href={`#${p.id}`} className={`mt-4 inline-flex cta-glow-border ${colors.glowClass} px-4 py-2 text-sm font-medium text-amber-600 rounded-lg hover:bg-amber-50 transition`}>
+                    Xem quê hương tôi
+                  </a>
+                </article>
+              </Reveal>
+            )
+          })}
         </div>
       </div>
     </section>
@@ -344,8 +354,6 @@ function ThanhHoaSection() {
   const [quizIdx, setQuizIdx] = useState(0)
   const [quizScore, setQuizScore] = useState(0)
   const [quizAnswered, setQuizAnswered] = useState<Record<number, boolean>>({})
-  const [orderOpen, setOrderOpen] = useState(false)
-
   // Sub-slides for "Di tích lịch sử" accordion item
   const diTichSlides = [
     { title: 'Thành Nhà Hồ', image: '/images/thanh-nha-ho.png', desc: 'Thành Nhà Hồ là di sản văn hóa thế giới UNESCO, được xây dựng năm 1397, là công trình thành đá độc đáo nhất Đông Nam Á.' },
@@ -359,7 +367,7 @@ function ThanhHoaSection() {
     { title: 'Người kiên cường', image: '/images/le-hoi-poon-poong.png', desc: 'Lễ hội Pôồn Pôông - nghi lễ dân gian đặc sắc của người Mường tại Thanh Hóa, thường tổ chức vào rằm tháng Giêng hoặc tháng Bảy, cầu mùa màng bội thu và nhân khang vật thịnh.' },
   ]
 
-  const stepLabels = ['Di tích lịch sử', 'Khám phá báu vật', 'Thưởng thức vị quê']
+  const stepLabels = ['Di sản văn hóa', 'Minigame']
 
   const handleQuizAnswer = (ans: string) => {
     if (quizAnswered[quizIdx]) return
@@ -369,7 +377,7 @@ function ThanhHoaSection() {
   }
 
   return (
-    <section id="thanh-hoa" className="relative py-16 md:py-24 overflow-hidden" style={{ background: 'linear-gradient(135deg, #7f1d1d 0%, #991b1b 40%, #7f1d1d 100%)' }}>
+    <section id="thanh-hoa" className="relative py-16 md:py-24 overflow-hidden" style={{ background: 'linear-gradient(135deg, #7f1d1d 0%, #991b1b 30%, #b91c1c 50%, #c2410c 70%, #9a3412 100%)' }}>
       <div className="mx-auto max-w-7xl px-4 md:px-6">
         <Reveal>
           <div className="text-center mb-8">
@@ -441,48 +449,62 @@ function ThanhHoaSection() {
           </Reveal>
         )}
 
-        {/* Page 3: Nem chua product */}
-        {page === 2 && (
-          <Reveal>
-            <div className="glass-dark rounded-2xl overflow-hidden">
-              <div className="grid lg:grid-cols-2">
-                <div className="relative p-8 flex flex-col justify-center">
-                  <p className="text-xs uppercase tracking-widest text-amber-400/80">Đặc sản xứ Thanh</p>
-                  <h3 className="mt-2 text-3xl font-bold text-amber-100" style={{ fontFamily: 'Georgia, serif' }}>Nem Chua Thanh Hóa</h3>
-                  <p className="mt-2 text-amber-100/70 italic" style={{ fontFamily: 'Georgia, serif' }}>Vị chua thanh, cay nồng - Gói trọn nghĩa tình xứ Thanh</p>
+        <ProgressBar steps={stepLabels} current={page} onNav={setPage} color="#fbbf24" />
 
-                  <div className="mt-4 flex gap-4">
-                    {[{ Icon: Leaf, text: '100% Tự nhiên' }, { Icon: ShieldCheck, text: 'Không chất bảo quản' }, { Icon: Truck, text: 'Giao hàng siêu tốc' }].map(f => (
-                      <div key={f.text} className="text-center">
-                        <f.Icon className="h-5 w-5 mx-auto text-amber-300" />
-                        <p className="text-[10px] text-white/60 mt-1">{f.text}</p>
-                      </div>
-                    ))}
-                  </div>
+        <div className="mt-8 text-center">
+          <a href="#nem-chua-thanh-hoa" className="cta-shine-red inline-flex rounded-xl px-8 py-4 font-bold text-white shadow-lg hover:scale-105 transition">
+            Thưởng thức vị quê
+          </a>
+        </div>
+      </div>
+    </section>
+  )
+}
 
-                  <div className="mt-4 space-y-1 text-sm text-white/70">
-                    <p>• Lên men tự nhiên</p>
-                    <p>• Giòn dai sần sật</p>
-                    <p>• Khối lượng: 10 cái</p>
-                  </div>
-
-                  <p className="mt-4 text-3xl font-bold text-amber-300">50.000đ</p>
-                  <p className="text-xs text-white/50">Đã có 156 người đặt mua trong tuần này</p>
-
-                  <button onClick={() => setOrderOpen(true)} className="btn-shine mt-4 rounded-xl bg-gradient-to-r from-red-600 to-orange-500 px-6 py-3 font-bold text-white shadow-lg">
-                    TRẢI NGHIỆM VỊ QUÊ
-                  </button>
+/* ====================================================================
+   NEM CHUA SECTION (standalone)
+   ==================================================================== */
+function NemChuaSection() {
+  const [orderOpen, setOrderOpen] = useState(false)
+  return (
+    <section id="nem-chua-thanh-hoa" className="py-16 md:py-24" style={{ background: 'linear-gradient(135deg, #7f1d1d 0%, #991b1b 50%, #7f1d1d 100%)' }}>
+      <div className="mx-auto max-w-7xl px-4 md:px-6">
+        <Reveal>
+          {/* Same product content as the old page 2, but as a full section */}
+          <div className="glass-dark rounded-2xl overflow-hidden">
+            <div className="grid lg:grid-cols-2">
+              {/* LEFT: product info */}
+              <div className="relative p-8 flex flex-col justify-center">
+                <p className="text-xs uppercase tracking-widest text-amber-400/80">Đặc sản xứ Thanh</p>
+                <h3 className="mt-2 text-3xl font-bold text-amber-100" style={{ fontFamily: 'Georgia, serif' }}>Nem Chua Thanh Hóa</h3>
+                <p className="mt-2 text-amber-100/70 italic" style={{ fontFamily: 'Georgia, serif' }}>Vị chua thanh, cay nồng - Gói trọn nghĩa tình xứ Thanh</p>
+                <div className="mt-4 flex gap-4">
+                  {[{ Icon: Leaf, text: '100% Tự nhiên' }, { Icon: ShieldCheck, text: 'Không chất bảo quản' }, { Icon: Truck, text: 'Giao hàng siêu tốc' }].map(f => (
+                    <div key={f.text} className="text-center">
+                      <f.Icon className="h-5 w-5 mx-auto text-amber-300" />
+                      <p className="text-[10px] text-white/60 mt-1">{f.text}</p>
+                    </div>
+                  ))}
                 </div>
-                <div className="relative min-h-[300px] bg-gradient-to-br from-red-900/50 to-red-800/30 flex items-center justify-center p-8">
-                  <img src="https://images.unsplash.com/photo-1600891963935-c1a1f4dcf04b?q=80&w=800&auto=format&fit=crop" alt="Nem chua Thanh Hóa" className="max-h-80 rounded-2xl object-cover shadow-2xl" />
-                  <div className="product-badge">Độc quyền<br/>3 Công Chúa</div>
+                <div className="mt-4 space-y-1 text-sm text-white/70">
+                  <p>• Lên men tự nhiên</p>
+                  <p>• Giòn dai sần sật</p>
+                  <p>• Khối lượng: 10 cái</p>
                 </div>
+                <p className="mt-4 text-3xl font-bold text-amber-300">50.000đ</p>
+                <p className="text-xs text-white/50">Đã có 156 người đặt mua trong tuần này</p>
+                <button onClick={() => setOrderOpen(true)} className="btn-shine mt-4 rounded-xl bg-gradient-to-r from-red-600 to-orange-500 px-6 py-3 font-bold text-white shadow-lg">
+                  TRẢI NGHIỆM VỊ QUÊ
+                </button>
+              </div>
+              {/* RIGHT: product image */}
+              <div className="relative min-h-[300px] bg-gradient-to-br from-red-900/50 to-red-800/30 flex items-center justify-center p-8">
+                <img src="/images/nem-chua.png" alt="Nem chua Thanh Hóa" className="max-h-80 rounded-2xl object-cover shadow-2xl" />
+                <div className="product-badge">Độc quyền<br/>3 Công Chúa</div>
               </div>
             </div>
-          </Reveal>
-        )}
-
-        <ProgressBar steps={stepLabels} current={page} onNav={setPage} color="#fbbf24" />
+          </div>
+        </Reveal>
       </div>
       <OrderModal open={orderOpen} onClose={() => setOrderOpen(false)} productName="Nem Chua Thanh Hóa" accentColor="#dc2626" />
     </section>
@@ -495,7 +517,6 @@ function ThanhHoaSection() {
 function QuangNinhSection() {
   const [page, setPage] = useState(0)
   const [selectedIsland, setSelectedIsland] = useState<string | null>(null)
-  const [orderOpen, setOrderOpen] = useState(false)
 
   const islands = [
     { id: 'tuan-chau', name: 'Đảo Tuần Châu', x: '35%', y: '55%', text: 'Tuần Châu là điểm du lịch biển nổi bật, thuận tiện để bắt đầu hành trình khám phá Vịnh Hạ Long.', image: '/images/dao-tuan-chau.png' },
@@ -509,10 +530,10 @@ function QuangNinhSection() {
     { name: 'Núi Yên Tử', image: '/images/nui-yen-tu.png', desc: 'Trung tâm văn hóa Phật giáo Trúc Lâm, điểm hành hương nổi tiếng của Việt Nam.' },
   ]
 
-  const stepLabels = ['Khám phá biển đảo', 'Di sản văn hóa', 'Carnaval Hạ Long', 'Đặc sản biển']
+  const stepLabels = ['Khám phá biển đảo', 'Di sản văn hóa', 'Carnaval Hạ Long']
 
   return (
-    <section id="quang-ninh" className="py-16 md:py-24 overflow-hidden" style={{ background: 'linear-gradient(135deg, #0c4a6e 0%, #075985 40%, #0c4a6e 100%)' }}>
+    <section id="quang-ninh" className="py-16 md:py-24 overflow-hidden" style={{ background: 'linear-gradient(135deg, #7f1d1d 0%, #0c4a6e 20%, #075985 40%, #0e7490 60%, #065f46 80%, #064e3b 100%)' }}>
       <div className="mx-auto max-w-7xl px-4 md:px-6">
         <Reveal>
           <div className="text-center mb-8">
@@ -595,44 +616,56 @@ function QuangNinhSection() {
           </Reveal>
         )}
 
-        {/* Page 4: Chả mực product */}
-        {page === 3 && (
-          <Reveal>
-            <div className="rounded-2xl overflow-hidden" style={{ background: 'linear-gradient(135deg, #0d9488, #0891b2)' }}>
-              <div className="grid lg:grid-cols-2">
-                <div className="p-8 flex flex-col justify-center">
-                  <p className="text-xs uppercase tracking-widest text-teal-200/80">Đặc sản tuyển chọn - 3 Công Chúa</p>
-                  <h3 className="mt-2 text-3xl font-bold text-white" style={{ fontFamily: 'Georgia, serif' }}>Chả Mực – "Vàng Ròng" Từ Biển Cả</h3>
-                  <p className="mt-2 text-teal-100/80 italic" style={{ fontFamily: 'Georgia, serif' }}>Giã tay thủ công - Giữ trọn vị ngọt biển khơi Quảng Ninh</p>
+        <ProgressBar steps={stepLabels} current={page} onNav={setPage} color="#22d3ee" />
 
-                  <div className="mt-4 flex gap-4">
-                    {[{ t: 'Sạch' }, { t: 'Chất' }, { t: 'Giòn Dai' }].map(f => (
-                      <span key={f.t} className="rounded-full border border-teal-300/40 bg-teal-400/10 px-3 py-1 text-xs text-teal-100">{f.t}</span>
-                    ))}
-                  </div>
+        <div className="mt-8 text-center">
+          <a href="#dac-san-bien" className="cta-shine-blue inline-flex rounded-xl px-8 py-4 font-bold text-white shadow-lg hover:scale-105 transition">
+            Đặc sản biển
+          </a>
+        </div>
+      </div>
+    </section>
+  )
+}
 
-                  <div className="mt-4 space-y-1 text-sm text-white/70">
-                    <p>• 95% Mực tươi nguyên chất</p>
-                    <p>• Giã tay thủ công</p>
-                    <p>• Khối lượng: 500g</p>
-                  </div>
-
-                  <p className="mt-4 text-3xl font-bold text-amber-300">245.000đ</p>
-
-                  <button onClick={() => setOrderOpen(true)} className="btn-shine mt-4 rounded-xl bg-gradient-to-r from-teal-700 to-cyan-600 px-6 py-3 font-bold text-white shadow-lg w-fit">
-                    ĐẶT HÀNG NGAY
-                  </button>
+/* ====================================================================
+   ĐẶC SẢN BIỂN SECTION (standalone)
+   ==================================================================== */
+function DacSanBienSection() {
+  const [orderOpen, setOrderOpen] = useState(false)
+  return (
+    <section id="dac-san-bien" className="py-16 md:py-24" style={{ background: 'linear-gradient(135deg, #0d9488, #0891b2)' }}>
+      <div className="mx-auto max-w-7xl px-4 md:px-6">
+        <Reveal>
+          {/* Same chả mực product content as old page 3 */}
+          <div className="rounded-2xl overflow-hidden glass-dark">
+            <div className="grid lg:grid-cols-2">
+              <div className="p-8 flex flex-col justify-center">
+                <p className="text-xs uppercase tracking-widest text-teal-200/80">Đặc sản tuyển chọn - 3 Công Chúa</p>
+                <h3 className="mt-2 text-3xl font-bold text-white" style={{ fontFamily: 'Georgia, serif' }}>Chả Mực – "Vàng Ròng" Từ Biển Cả</h3>
+                <p className="mt-2 text-teal-100/80 italic" style={{ fontFamily: 'Georgia, serif' }}>Giã tay thủ công - Giữ trọn vị ngọt biển khơi Quảng Ninh</p>
+                <div className="mt-4 flex gap-4">
+                  {[{ t: 'Sạch' }, { t: 'Chất' }, { t: 'Giòn Dai' }].map(f => (
+                    <span key={f.t} className="rounded-full border border-teal-300/40 bg-teal-400/10 px-3 py-1 text-xs text-teal-100">{f.t}</span>
+                  ))}
                 </div>
-                <div className="relative min-h-[300px] flex items-center justify-center p-8 bg-teal-900/30">
-                  <img src="/images/cha-muc.png" alt="Chả mực Hạ Long" className="max-h-72 rounded-2xl object-contain drop-shadow-2xl" />
-                  <div className="product-badge" style={{ background: 'linear-gradient(135deg, #ffd700, #f59e0b)' }}>Đặc sản<br/>Tuyển chọn</div>
+                <div className="mt-4 space-y-1 text-sm text-white/70">
+                  <p>• 95% Mực tươi nguyên chất</p>
+                  <p>• Giã tay thủ công</p>
+                  <p>• Khối lượng: 500g</p>
                 </div>
+                <p className="mt-4 text-3xl font-bold text-amber-300">245.000đ</p>
+                <button onClick={() => setOrderOpen(true)} className="btn-shine mt-4 rounded-xl bg-gradient-to-r from-teal-700 to-cyan-600 px-6 py-3 font-bold text-white shadow-lg w-fit">
+                  ĐẶT HÀNG NGAY
+                </button>
+              </div>
+              <div className="relative min-h-[300px] flex items-center justify-center p-8 bg-teal-900/30">
+                <img src="/images/cha-muc.png" alt="Chả mực Hạ Long" className="max-h-72 rounded-2xl object-contain drop-shadow-2xl" />
+                <div className="product-badge" style={{ background: 'linear-gradient(135deg, #ffd700, #f59e0b)' }}>Đặc sản<br/>Tuyển chọn</div>
               </div>
             </div>
-          </Reveal>
-        )}
-
-        <ProgressBar steps={stepLabels} current={page} onNav={setPage} color="#22d3ee" />
+          </div>
+        </Reveal>
       </div>
       <OrderModal open={orderOpen} onClose={() => setOrderOpen(false)} productName="Chả Mực Hạ Long" accentColor="#0d9488" />
     </section>
@@ -649,7 +682,7 @@ function HungYenSection() {
   const stepLabels = ['Phố Hiến nàng thơ', 'Vườn nhãn cổ thụ', 'Long nhãn tiến vua']
 
   return (
-    <section id="hung-yen" className="py-16 md:py-24 overflow-hidden" style={{ background: 'linear-gradient(135deg, #1a2e05 0%, #365314 40%, #1a2e05 100%)' }}>
+    <section id="hung-yen" className="py-16 md:py-24 overflow-hidden" style={{ background: 'linear-gradient(135deg, #065f46 0%, #047857 30%, #065f46 50%, #78350f 80%, #92400e 100%)' }}>
       <div className="mx-auto max-w-7xl px-4 md:px-6">
         <Reveal>
           <div className="text-center mb-8">
@@ -785,29 +818,56 @@ const TIMELINE_EVENTS = [
 
 function VanMieuHeritageSection() {
   return (
-    <section id="giao-lo-dinh-menh" className="relative py-20 md:py-28 overflow-hidden bg-slate-950">
+    <section id="giao-lo-dinh-menh" className="relative py-20 md:py-28 overflow-hidden" style={{ background: 'linear-gradient(180deg, #fffbeb 0%, #fef3c7 50%, #fde68a 100%)' }}>
       <div className="relative z-10 mx-auto max-w-6xl px-4 md:px-6">
 
         {/* Nhân vật lịch sử */}
         <Reveal>
           <div className="text-center mb-10">
-            <h2 className="text-3xl font-extrabold text-amber-300 md:text-5xl" style={{ textShadow: '0 0 20px rgba(245,158,11,0.3)' }}>
+            <h2 className="text-3xl font-extrabold text-amber-700 md:text-5xl" style={{ textShadow: '0 1px 8px rgba(180,120,30,0.15)' }}>
               GIAO LỘ ĐỊNH MỆNH
             </h2>
-            <p className="mt-2 text-sm uppercase tracking-[0.2em] text-white/70">Khi những dòng chảy hội tụ về đại dương tri thức</p>
+            <p className="mt-2 text-sm uppercase tracking-[0.2em] text-gray-600">Khi những dòng chảy hội tụ về đại dương tri thức</p>
           </div>
         </Reveal>
 
         <Reveal delay={100}>
-          <div className="glass mt-6 rounded-2xl p-6 text-left mb-12">
-            <p className="text-sm text-white/85 leading-relaxed">
+          <div className="bg-white/60 backdrop-blur border border-amber-200/50 rounded-2xl mt-6 p-6 text-left mb-12">
+            <p className="text-sm text-gray-700 leading-relaxed">
               Mang theo sự kiên cường của đất học Thanh Hóa, sức sống khoáng đạt của biển bạc Quảng Ninh, hay nét tinh tế từ phù sa Hưng Yên; định mệnh đã đưa ba tâm hồn đồng điệu gặp gỡ. Chúng mình không chỉ mang theo niềm tự hào quê hương, mà còn mang cả khát khao chinh phục những tầm cao mới, đem tri thức về xây dựng quê hương.
             </p>
           </div>
         </Reveal>
 
+        {/* 3 convergence paths SVG */}
+        <Reveal delay={150}>
+          <div className="my-12 flex justify-center">
+            <div className="relative w-full max-w-2xl h-64">
+              <svg viewBox="0 0 600 250" className="w-full h-full">
+                {/* Thanh Hoa path - red from left */}
+                <path d="M 0,50 C 150,50 200,125 300,125" stroke="#dc2626" strokeWidth="4" fill="none" className="path-animate" />
+                {/* Quang Ninh path - blue from right */}
+                <path d="M 600,50 C 450,50 400,125 300,125" stroke="#0891b2" strokeWidth="4" fill="none" className="path-animate" style={{ animationDelay: '0.3s' }} />
+                {/* Hung Yen path - gold from bottom */}
+                <path d="M 300,250 C 300,200 300,150 300,125" stroke="#d97706" strokeWidth="4" fill="none" className="path-animate" style={{ animationDelay: '0.6s' }} />
+                {/* Center circle - HOU logo */}
+                <circle cx="300" cy="125" r="35" fill="#1e40af" stroke="#d4af37" strokeWidth="3" />
+                <text x="300" y="120" textAnchor="middle" fill="white" fontSize="10" fontWeight="bold">ĐH Mở</text>
+                <text x="300" y="135" textAnchor="middle" fill="white" fontSize="8">Hà Nội</text>
+                {/* Province labels */}
+                <circle cx="30" cy="50" r="20" fill="#dc2626" />
+                <text x="30" y="54" textAnchor="middle" fill="white" fontSize="7" fontWeight="bold">TH</text>
+                <circle cx="570" cy="50" r="20" fill="#0891b2" />
+                <text x="570" y="54" textAnchor="middle" fill="white" fontSize="7" fontWeight="bold">QN</text>
+                <circle cx="300" cy="235" r="20" fill="#d97706" />
+                <text x="300" y="239" textAnchor="middle" fill="white" fontSize="7" fontWeight="bold">HY</text>
+              </svg>
+            </div>
+          </div>
+        </Reveal>
+
         <Reveal delay={200}>
-          <h3 className="text-center text-xl font-bold text-amber-200 md:text-2xl mb-8">Những Nhân Vật Kiến Tạo Nền Giáo Dục Việt</h3>
+          <h3 className="text-center text-xl font-bold text-amber-700 md:text-2xl mb-8">Những Nhân Vật Kiến Tạo Nền Giáo Dục Việt</h3>
           <div className="grid grid-cols-2 gap-5 sm:grid-cols-3">
             {HISTORICAL_FIGURES.map((fig, i) => (
               <Reveal key={fig.name} delay={i * 80}>
@@ -815,8 +875,8 @@ function VanMieuHeritageSection() {
                   <div className={`mx-auto mb-3 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br ${fig.color} text-2xl font-extrabold text-white shadow-lg md:h-24 md:w-24`}>
                     {fig.initial}
                   </div>
-                  <h4 className="text-sm font-bold text-amber-200 md:text-base">{fig.name}</h4>
-                  <p className="mt-1 text-xs leading-relaxed text-white/70 md:text-sm">{fig.desc}</p>
+                  <h4 className="text-sm font-bold text-amber-800 md:text-base">{fig.name}</h4>
+                  <p className="mt-1 text-xs leading-relaxed text-gray-600 md:text-sm">{fig.desc}</p>
                 </div>
               </Reveal>
             ))}
@@ -826,16 +886,16 @@ function VanMieuHeritageSection() {
         {/* Timeline */}
         <Reveal delay={300}>
           <div className="mt-16 mb-12">
-            <h3 className="text-center text-lg font-bold text-amber-200 md:text-xl mb-6">Dòng Chảy Lịch Sử</h3>
+            <h3 className="text-center text-lg font-bold text-amber-700 md:text-xl mb-6">Dòng Chảy Lịch Sử</h3>
             <div className="relative mx-auto max-w-3xl">
-              <div className="absolute left-1/2 top-0 bottom-0 w-px -translate-x-1/2 bg-amber-400/30" />
+              <div className="absolute left-1/2 top-0 bottom-0 w-px -translate-x-1/2 bg-amber-400/50" />
               {TIMELINE_EVENTS.map((ev, i) => (
                 <div key={ev.year} className={`relative mb-6 flex items-start gap-4 ${i % 2 === 0 ? 'flex-row' : 'flex-row-reverse'} md:px-8`}>
                   <div className={`flex-1 ${i % 2 === 0 ? 'text-right' : 'text-left'}`}>
-                    <span className="text-lg font-extrabold text-amber-300">{ev.year}</span>
-                    <p className="text-xs text-white/75 mt-0.5 leading-relaxed md:text-sm">{ev.text}</p>
+                    <span className="text-lg font-extrabold text-amber-700">{ev.year}</span>
+                    <p className="text-xs text-gray-600 mt-0.5 leading-relaxed md:text-sm">{ev.text}</p>
                   </div>
-                  <div className="relative z-10 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 border-amber-400 bg-slate-950 mt-1" />
+                  <div className="relative z-10 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 border-amber-500 bg-white mt-1" />
                   <div className="flex-1" />
                 </div>
               ))}
@@ -847,10 +907,10 @@ function VanMieuHeritageSection() {
         <Reveal delay={400}>
           <div className="mt-8 text-center">
             <blockquote className="mx-auto max-w-2xl">
-              <p className="text-xl font-bold italic text-amber-200 md:text-2xl" style={{ fontFamily: 'Georgia, serif' }}>
+              <p className="text-xl font-bold italic text-amber-800 md:text-2xl" style={{ fontFamily: 'Georgia, serif' }}>
                 "Hiền tài là nguyên khí quốc gia, nguyên khí thịnh thì thế nước mạnh mà hưng, nguyên khí suy thì thế nước yếu mà thấp."
               </p>
-              <footer className="mt-4 text-sm font-medium text-amber-400/80">
+              <footer className="mt-4 text-sm font-medium text-amber-600">
                 — Thân Nhân Trung
               </footer>
             </blockquote>
@@ -860,26 +920,26 @@ function VanMieuHeritageSection() {
         {/* KẾ THỪA TỪ BIỂU TƯỢNG */}
         <Reveal delay={500}>
           <div className="mt-16">
-            <h3 className="text-center text-xl font-bold text-amber-200 md:text-2xl" style={{ fontFamily: 'Georgia, serif' }}>
+            <h3 className="text-center text-xl font-bold text-amber-800 md:text-2xl" style={{ fontFamily: 'Georgia, serif' }}>
               KẾ THỪA TỪ BIỂU TƯỢNG, VƯƠN XA BẰNG KHÁT VỌNG
             </h3>
-            <p className="mt-4 mx-auto max-w-3xl text-center text-sm text-white/80 leading-relaxed">
+            <p className="mt-4 mx-auto max-w-3xl text-center text-sm text-gray-700 leading-relaxed">
               Khép lại không gian cổ kính của Văn Miếu, chúng ta bắt đầu một hành trình mới — nơi biểu tượng Khuê Văn Các được nâng niu trên ngực áo của hàng vạn sinh viên. Hãy cùng khám phá xem, tinh thần đạo học nghìn năm đã được Trường Đại học Mở Hà Nội kế thừa và lan tỏa như thế nào.
             </p>
 
             <div className="mt-10 grid gap-6 md:grid-cols-2">
-              <div className="glass-gold rounded-2xl p-6">
-                <h4 className="text-lg font-bold text-amber-200">Khuê Văn Các</h4>
-                <p className="mt-2 text-sm text-white/80 leading-relaxed">
+              <div className="bg-white/70 backdrop-blur-md border border-amber-300/50 rounded-2xl shadow-lg p-6">
+                <h4 className="text-lg font-bold text-amber-700">Khuê Văn Các</h4>
+                <p className="mt-2 text-sm text-gray-600 leading-relaxed">
                   Hình tượng Khuê Văn Các biểu tượng cho Quốc Tử Giám — Trường Đại học đầu tiên của Việt Nam. Khuê Văn Các chính là biểu tượng của sự đỗ đạt, thành công trong học hành và sự nghiệp, đồng thời thể hiện khát vọng vươn lên của con người Việt Nam qua mọi thời đại.
                 </p>
               </div>
-              <div className="glass-gold rounded-2xl p-6">
+              <div className="bg-white/70 backdrop-blur-md border border-amber-300/50 rounded-2xl shadow-lg p-6">
                 <div className="flex items-center gap-3 mb-3">
                   <img src="/images/logo-dh-mo.png" alt="Logo ĐH Mở" className="h-12 w-12 rounded-full object-contain bg-white p-1 border-2 border-amber-400/50" />
-                  <h4 className="text-lg font-bold text-amber-200">Trường Đại học Mở Hà Nội</h4>
+                  <h4 className="text-lg font-bold text-amber-700">Trường Đại học Mở Hà Nội</h4>
                 </div>
-                <p className="text-sm text-white/80 leading-relaxed">
+                <p className="text-sm text-gray-600 leading-relaxed">
                   Hình tượng Khuê Văn Các được sử dụng trong logo, tượng trưng cho sứ mệnh tiên phong trong giáo dục mở và đào tạo từ xa ở Việt Nam. Hình tượng ô cửa tượng trưng cho cánh cửa tri thức. Các tia sáng tỏa đi các hướng mang ý nghĩa luôn hội nhập, nâng cao chất lượng đào tạo — tượng trưng cho ước mơ bay cao, bay xa của người học.
                 </p>
               </div>
@@ -926,7 +986,7 @@ function DaiHocMoSection() {
   const [activeTab, setActiveTab] = useState(0)
 
   return (
-    <section id="dai-hoc-mo" className="bg-slate-900 py-14 text-white md:py-20">
+    <section id="dai-hoc-mo" className="py-14 md:py-20" style={{ background: 'linear-gradient(180deg, #fef3c7 0%, #fffbeb 30%, #ffffff 100%)' }}>
       <div className="mx-auto max-w-7xl px-4 md:px-6">
 
         {/* Title */}
@@ -935,13 +995,13 @@ function DaiHocMoSection() {
             <div className="flex items-center justify-center gap-3 mb-4">
               <img src="/images/logo-dh-mo.png" alt="Logo ĐH Mở" className="h-14 w-14 rounded-full object-contain bg-white p-1 border-2 border-amber-400/50" />
             </div>
-            <h2 className="text-2xl font-extrabold md:text-4xl">
+            <h2 className="text-2xl font-extrabold text-gray-900 md:text-4xl">
               TRƯỜNG ĐẠI HỌC MỞ HÀ NỘI
             </h2>
-            <p className="mt-1 text-lg font-semibold text-amber-300">
+            <p className="mt-1 text-lg font-semibold text-amber-600">
               Viết Tiếp Chương Mới Của Trí Tuệ Việt
             </p>
-            <p className="mt-3 mx-auto max-w-2xl text-sm text-slate-300 leading-relaxed">
+            <p className="mt-3 mx-auto max-w-2xl text-sm text-gray-600 leading-relaxed">
               Đại học Mở Hà Nội là cơ sở giáo dục đại học công lập đa ngành, định hướng mở rộng cơ hội học tập, phát triển năng lực thực tiễn và hội nhập.
             </p>
           </div>
@@ -951,10 +1011,10 @@ function DaiHocMoSection() {
         <Reveal delay={100}>
           <div className="grid grid-cols-2 gap-4 md:grid-cols-5 mb-12">
             {HOU_STATS.map(s => (
-              <div key={s.label} className="glass rounded-xl p-4 text-center">
-                <p className="text-2xl font-extrabold text-amber-300 md:text-3xl">{s.value}</p>
-                <p className="text-sm font-semibold text-white mt-1">{s.label}</p>
-                <p className="text-[10px] text-white/50 mt-0.5">{s.sub}</p>
+              <div key={s.label} className="counter-card rounded-xl p-4 text-center">
+                <p className="text-2xl font-extrabold text-amber-600 md:text-3xl">{s.value}</p>
+                <p className="text-sm font-semibold text-gray-800 mt-1">{s.label}</p>
+                <p className="text-[10px] text-gray-500 mt-0.5">{s.sub}</p>
               </div>
             ))}
           </div>
@@ -962,22 +1022,22 @@ function DaiHocMoSection() {
 
         {/* Khoa Kinh tế */}
         <Reveal delay={200}>
-          <div className="rounded-2xl border border-slate-700 bg-slate-800/80 overflow-hidden">
+          <div id="khoa-kinh-te" className="rounded-2xl border border-amber-200 bg-white/80 backdrop-blur shadow-lg overflow-hidden">
             <div className="p-6 md:p-8">
-              <h3 className="text-xl font-extrabold md:text-2xl">KHOA KINH TẾ, TRƯỜNG ĐẠI HỌC MỞ HÀ NỘI</h3>
-              <p className="mt-1 text-sm text-amber-300/80">Kiến tạo tương lai</p>
+              <h3 className="text-xl font-extrabold text-gray-900 md:text-2xl">KHOA KINH TẾ, TRƯỜNG ĐẠI HỌC MỞ HÀ NỘI</h3>
+              <p className="mt-1 text-sm text-amber-600">Kiến tạo tương lai</p>
             </div>
 
             {/* Tabs */}
-            <div className="flex flex-wrap border-t border-slate-700">
+            <div className="flex flex-wrap border-t border-amber-200">
               {KHOA_KT_TABS.map((tab, i) => (
                 <button
                   key={tab.title}
                   onClick={() => setActiveTab(i)}
                   className={`flex-1 min-w-[140px] px-4 py-3 text-xs font-semibold transition cursor-pointer ${
                     activeTab === i
-                      ? 'bg-amber-500/15 text-amber-300 border-b-2 border-amber-400'
-                      : 'text-white/60 hover:text-white/80 hover:bg-white/5'
+                      ? 'bg-amber-100 text-amber-700 border-b-2 border-amber-500'
+                      : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
                   }`}
                 >
                   {tab.title}
@@ -986,17 +1046,40 @@ function DaiHocMoSection() {
             </div>
 
             <div className="p-6 md:p-8">
-              <p className="text-sm text-slate-200 leading-relaxed">{KHOA_KT_TABS[activeTab].content}</p>
+              <p className="text-sm text-gray-700 leading-relaxed">{KHOA_KT_TABS[activeTab].content}</p>
             </div>
 
             {/* NGŨ MỞ */}
-            <div className="border-t border-slate-700 p-6 md:p-8">
-              <h4 className="text-sm font-semibold uppercase tracking-wide text-amber-300 mb-3">5 chữ MỞ</h4>
+            <div className="border-t border-amber-200 p-6 md:p-8">
+              <h4 className="text-sm font-semibold uppercase tracking-wide text-amber-700 mb-3">5 chữ MỞ</h4>
               <div className="flex flex-wrap gap-2">
                 {['Mở cơ hội', 'Mở trí tuệ', 'Mở trái tim', 'Mở tầm nhìn', 'Mở tương lai'].map(v => (
-                  <span key={v} className="rounded-full border border-amber-400/40 bg-amber-400/10 px-3 py-1 text-xs text-amber-200">{v}</span>
+                  <span key={v} className="rounded-full border border-amber-400/50 bg-amber-100 px-3 py-1 text-xs text-amber-700">{v}</span>
                 ))}
               </div>
+            </div>
+          </div>
+        </Reveal>
+
+        {/* Cơ hội nghề nghiệp */}
+        <Reveal delay={250}>
+          <div className="mt-8">
+            <h3 className="text-xl font-bold text-amber-700 text-center mb-6" style={{ fontFamily: 'Georgia, serif' }}>
+              Cơ Hội Nghề Nghiệp
+            </h3>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {[
+                { title: 'Quản lý cấp cao', desc: 'Vị trí lãnh đạo tại các tập đoàn, doanh nghiệp lớn trong và ngoài nước.', Icon: TrendingUp },
+                { title: 'Chuyên gia tư vấn', desc: 'Tư vấn chiến lược kinh doanh, tài chính, đầu tư cho doanh nghiệp.', Icon: Handshake },
+                { title: 'Khởi nghiệp', desc: 'Xây dựng và phát triển doanh nghiệp riêng với nền tảng kiến thức vững chắc.', Icon: Rocket },
+                { title: 'Phân tích tài chính', desc: 'Phân tích, đánh giá và dự báo tình hình tài chính doanh nghiệp.', Icon: BarChart3 },
+              ].map(item => (
+                <div key={item.title} className="career-card bg-white rounded-xl p-5 shadow-md">
+                  <item.Icon className="h-8 w-8 text-amber-600 mb-3" />
+                  <h4 className="text-lg font-bold text-amber-700">{item.title}</h4>
+                  <p className="mt-2 text-sm text-gray-600 leading-relaxed">{item.desc}</p>
+                </div>
+              ))}
             </div>
           </div>
         </Reveal>
@@ -1006,28 +1089,28 @@ function DaiHocMoSection() {
           <div className="mt-8 grid gap-4 sm:grid-cols-2">
             <a
               href="#lien-he"
-              className="glass group flex items-center gap-4 rounded-xl p-5 transition hover:bg-white/15"
+              className="bg-white shadow-md border border-gray-200 rounded-xl group flex items-center gap-4 p-5 transition hover:shadow-lg"
             >
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-amber-500/20">
-                <Heart className="h-6 w-6 text-amber-300" />
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-amber-100">
+                <Heart className="h-6 w-6 text-amber-600" />
               </div>
               <div>
-                <p className="text-sm font-bold text-amber-200 group-hover:text-amber-100">Gửi câu hỏi cho chúng tôi</p>
-                <p className="text-xs text-white/60">Liên hệ trực tiếp với đội ngũ dự án</p>
+                <p className="text-sm font-bold text-amber-700 group-hover:text-amber-600">Gửi câu hỏi cho chúng tôi</p>
+                <p className="text-xs text-gray-500">Liên hệ trực tiếp với đội ngũ dự án</p>
               </div>
             </a>
             <a
               href="https://tuyensinh.hou.edu.vn/"
               target="_blank"
               rel="noopener noreferrer"
-              className="glass group flex items-center gap-4 rounded-xl p-5 transition hover:bg-white/15"
+              className="bg-white shadow-md border border-gray-200 rounded-xl group flex items-center gap-4 p-5 transition hover:shadow-lg"
             >
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-emerald-500/20">
-                <GraduationCap className="h-6 w-6 text-emerald-300" />
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-emerald-100">
+                <GraduationCap className="h-6 w-6 text-emerald-600" />
               </div>
               <div>
-                <p className="text-sm font-bold text-emerald-200 group-hover:text-emerald-100">Tuyển sinh</p>
-                <p className="text-xs text-white/60">Tìm hiểu thông tin tuyển sinh tại tuyensinh.hou.edu.vn</p>
+                <p className="text-sm font-bold text-emerald-700 group-hover:text-emerald-600">Tuyển sinh</p>
+                <p className="text-xs text-gray-500">Tìm hiểu thông tin tuyển sinh tại tuyensinh.hou.edu.vn</p>
               </div>
             </a>
           </div>
@@ -1095,7 +1178,9 @@ export default function App() {
       <HeroSection />
       <PrincessesSection />
       <ThanhHoaSection />
+      <NemChuaSection />
       <QuangNinhSection />
+      <DacSanBienSection />
       <HungYenSection />
       <VanMieuHeritageSection />
       <DaiHocMoSection />
