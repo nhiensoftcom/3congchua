@@ -54,11 +54,11 @@
 .gradient-title {
   background: linear-gradient(
     90deg,
-    #ff7e00,
-    #e63946,
-    #ff7e00,
-    #e63946,
-    #ff7e00
+    #f5c542,
+    #d4a017,
+    #b8860b,
+    #d4a017,
+    #f5c542
   );
   background-size: 300% 100%;
   -webkit-background-clip: text;
