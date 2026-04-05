@@ -54,17 +54,18 @@
 .gradient-title {
   background: linear-gradient(
     90deg,
-    #d4a017,
-    #c5841a,
-    #8b3a1a,
-    #c5841a,
-    #d4a017
+    #FF7E00,
+    #E63946,
+    #FF7E00,
+    #E63946,
+    #FF7E00
   );
   background-size: 300% 100%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   animation: gradient-shift 4s ease infinite;
+  filter: drop-shadow(0 0 10px rgba(255, 126, 0, 0.6)) drop-shadow(0 0 20px rgba(230, 57, 70, 0.4)) drop-shadow(0 0 40px rgba(255, 126, 0, 0.3));
 }
 
 /* ===== Shine effect for CTA buttons ===== */
@@ -234,6 +235,29 @@
 .h-accordion-item.active .collapsed-title {
   opacity: 0;
   pointer-events: none;
+}
+
+/* ===== Glowing Nav Arrow ===== */
+.nav-arrow-glow {
+  position: relative;
+  animation: arrow-glow 1.5s ease-in-out infinite;
+  box-shadow: 0 0 8px rgba(251, 191, 36, 0.4), 0 0 20px rgba(251, 191, 36, 0.2);
+}
+.nav-arrow-glow::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(251, 191, 36, 0.15) 0%, transparent 70%);
+  animation: arrow-bubble 2s ease-in-out infinite;
+}
+@keyframes arrow-glow {
+  0%, 100% { box-shadow: 0 0 8px rgba(251, 191, 36, 0.4), 0 0 20px rgba(251, 191, 36, 0.2); }
+  50% { box-shadow: 0 0 16px rgba(251, 191, 36, 0.7), 0 0 40px rgba(251, 191, 36, 0.4), 0 0 60px rgba(251, 191, 36, 0.15); }
+}
+@keyframes arrow-bubble {
+  0%, 100% { transform: scale(1); opacity: 0.5; }
+  50% { transform: scale(1.4); opacity: 1; }
 }
 
 /* ===== Progress Bar ===== */

@@ -3,7 +3,7 @@ import {
   Landmark, Waves, Wheat, GraduationCap,
   Leaf, ShieldCheck, Truck,
   Brain, Star, PartyPopper,
-  Heart, Phone,
+  Heart, Phone, MapPin,
   Menu as MenuIcon, X as XIcon, Gift,
   ChevronLeft, ChevronRight,
   TrendingUp, Handshake, Rocket, BarChart3,
@@ -301,9 +301,9 @@ function HeroSection() {
       <div className="absolute inset-0 bg-gradient-to-b from-amber-900/20 via-transparent to-black/40 z-[2]" />
 
       {/* Content */}
-      <div className="relative z-[3] text-center px-4 max-w-4xl mx-auto mt-16">
+      <div className="relative z-[3] text-center px-4 max-w-5xl mx-auto mt-16">
         <Reveal direction="down">
-          <h1 className="gradient-title glow-text text-5xl md:text-7xl lg:text-8xl font-extrabold leading-tight" style={{ fontFamily: "'Montserrat', sans-serif", lineHeight: '1.05' }}>
+          <h1 className="gradient-title text-5xl md:text-7xl lg:text-8xl leading-tight whitespace-nowrap" style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 900, lineHeight: '1.05' }}>
             Vọng Âm Quá Khứ
           </h1>
         </Reveal>
@@ -390,17 +390,17 @@ function ThanhHoaSection() {
   const [quizIdx, setQuizIdx] = useState(0)
   const [quizScore, setQuizScore] = useState(0)
   const [quizAnswered, setQuizAnswered] = useState<Record<number, boolean>>({})
-  // Sub-slides for "Di tích lịch sử" accordion item
+  // Sub-slides for "Historical Relics" accordion item
   const diTichSlides = [
-    { title: 'Thành Nhà Hồ', image: '/images/thanh-nha-ho.png', desc: 'Thành Nhà Hồ là di sản văn hóa thế giới UNESCO, được xây dựng năm 1397, là công trình thành đá độc đáo nhất Đông Nam Á.' },
-    { title: 'Lam Kinh', image: '/images/lam-kinh.png', desc: 'Lam Kinh là vùng đất linh thiêng gắn với triều Hậu Lê, kinh đô thứ hai nơi dâng trào hào khí giữ nước.' },
-    { title: 'Trống đồng Đông Sơn', image: '/images/trong-dong.png', desc: 'Biểu tượng của văn minh Việt cổ, phản ánh đời sống vật chất và tinh thần rực rỡ của cư dân Lạc Việt xưa.' },
+    { title: 'Thành Nhà Hồ', image: '/thanh-hoa/anh1.png', desc: 'Thành Nhà Hồ là di sản văn hóa thế giới UNESCO, được xây dựng năm 1397, là công trình thành đá độc đáo nhất Đông Nam Á.' },
+    { title: 'Lam Kinh', image: '/thanh-hoa/anh2.png', desc: 'Lam Kinh là vùng đất linh thiêng gắn với triều Hậu Lê, kinh đô thứ hai nơi dâng trào hào khí giữ nước.' },
+    { title: 'Trống Đồng Đông Sơn', image: '/thanh-hoa/anh3.png', desc: 'Biểu tượng của văn minh Việt cổ, phản ánh đời sống vật chất và tinh thần rực rỡ của cư dân Lạc Việt xưa.' },
   ]
 
   const accItems = [
-    { title: 'Di tích lịch sử', image: diTichSlides[subSlide].image, desc: diTichSlides[subSlide].desc, hasSubNav: true },
-    { title: 'Danh lam thắng cảnh', image: '/images/bien-sam-son.png', desc: 'Biển Sầm Sơn được bao bọc bởi núi Trường Lệ và đền Độc Cước, tạo nên cảnh quan hùng vĩ.', hasVideo: true },
-    { title: 'Người kiên cường', image: '/images/le-hoi-poon-poong.png', desc: 'Lễ hội Pôồn Pôông - nghi lễ dân gian đặc sắc của người Mường tại Thanh Hóa, thường tổ chức vào rằm tháng Giêng hoặc tháng Bảy, cầu mùa màng bội thu và nhân khang vật thịnh.' },
+    { title: 'Historical Relics: A Thousand-Year Legacy', image: diTichSlides[subSlide].image, desc: diTichSlides[subSlide].desc, hasSubNav: true },
+    { title: 'Scenic Landscapes', subtitle: 'Sầm Sơn', image: '/images/bien-sam-son.png', desc: 'Biển Sầm Sơn được bao bọc bởi núi Trường Lệ và đền Độc Cước, tạo nên cảnh quan hùng vĩ.', hasVideo: true },
+    { title: 'Festivals & Culture', image: '/images/le-hoi-poon-poong.png', desc: 'Lễ hội Pôồn Pôông - nghi lễ dân gian đặc sắc của người Mường tại Thanh Hóa, thường tổ chức vào rằm tháng Giêng hoặc tháng Bảy, cầu mùa màng bội thu và nhân khang vật thịnh.' },
   ]
 
   const stepLabels = ['Di sản văn hóa', 'Minigame']
@@ -422,9 +422,10 @@ function ThanhHoaSection() {
           </div>
         </Reveal>
 
-        {/* Page 1: Horizontal Accordion (Di tích with sub-nav, Thắng cảnh, Lễ hội) */}
+        {/* Page 1: Horizontal Accordion (Heritage Flow) */}
         {page === 0 && (
           <Reveal direction="zoom">
+            <p className="text-xs uppercase tracking-[0.3em] text-amber-400/80 mb-3 font-semibold">Heritage Flow</p>
             <div className="h-accordion">
               {accItems.map((item, i) => (
                 <div key={item.title} className={`h-accordion-item ${i === accActive ? 'active' : ''}`} onClick={() => setAccActive(i)}>
@@ -435,17 +436,21 @@ function ThanhHoaSection() {
                   ) : (
                     <img src={item.image} alt={item.title} className="acc-bg" />
                   )}
-                  <div className="collapsed-title">{item.title}</div>
+                  <div className="collapsed-title">
+                    <span>{item.title}</span>
+                    {'subtitle' in item && item.subtitle && <span className="block text-xs mt-1 opacity-70">{item.subtitle}</span>}
+                  </div>
                   <div className="overlay-content">
-                    <div className="glass-dark rounded-xl p-4">
-                      <h3 className="text-lg font-bold text-amber-200">{i === 0 ? diTichSlides[subSlide].title : item.title}</h3>
+                    <div className="glass-dark rounded-xl p-5">
+                      <p className="text-[10px] uppercase tracking-widest text-amber-400/60 mb-1">{item.title}</p>
+                      <h3 className="text-xl font-bold text-amber-200">{i === 0 ? diTichSlides[subSlide].title : item.title}</h3>
                       <p className="mt-2 text-sm text-white/85 leading-relaxed">{item.desc}</p>
-                      {/* Sub-navigation arrows within "Di tích lịch sử" */}
+                      {/* Sub-navigation arrows within Historical Relics */}
                       {i === 0 && item.hasSubNav && (
-                        <div className="mt-3 flex items-center gap-2">
-                          <button onClick={e => { e.stopPropagation(); setSubSlide(s => Math.max(0, s - 1)) }} disabled={subSlide === 0} className="rounded-full border border-amber-400/40 p-1 text-amber-300 disabled:opacity-30 hover:bg-amber-500/20 cursor-pointer"><ChevronLeft className="h-4 w-4" /></button>
+                        <div className="mt-3 flex items-center gap-3">
+                          <button onClick={e => { e.stopPropagation(); setSubSlide(s => Math.max(0, s - 1)) }} disabled={subSlide === 0} className="rounded-full border border-amber-400/40 p-1.5 text-amber-300 disabled:opacity-30 hover:bg-amber-500/20 cursor-pointer"><ChevronLeft className="h-4 w-4" /></button>
                           <span className="text-xs text-amber-300/70">{subSlide + 1} / {diTichSlides.length}</span>
-                          <button onClick={e => { e.stopPropagation(); setSubSlide(s => Math.min(diTichSlides.length - 1, s + 1)) }} disabled={subSlide === diTichSlides.length - 1} className="rounded-full border border-amber-400/40 p-1 text-amber-300 disabled:opacity-30 hover:bg-amber-500/20 animate-pulse cursor-pointer"><ChevronRight className="h-4 w-4" /></button>
+                          <button onClick={e => { e.stopPropagation(); setSubSlide(s => Math.min(diTichSlides.length - 1, s + 1)) }} disabled={subSlide === diTichSlides.length - 1} className="nav-arrow-glow rounded-full border border-amber-400/60 p-1.5 text-amber-300 disabled:opacity-30 cursor-pointer"><ChevronRight className="h-5 w-5" /></button>
                         </div>
                       )}
                     </div>
